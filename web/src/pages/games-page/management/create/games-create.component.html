@@ -1,0 +1,31 @@
+<div class="header">
+    <span class="title-header">Creating a new game!</span>
+</div>
+
+<div class="actions">
+    <button class="btn btn-secondary btn-sm" (click)="goBackToGamesList()">Back</button>
+</div>
+
+<div class="poke-selection">    
+    <form class="example-form">
+        <mat-form-field class="example-full-width">
+            <mat-label>Pokémon</mat-label>
+            <input type="text" matInput 
+                [formControl]="searchControl"
+                [matAutocomplete]="auto">
+            <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelected($event)">
+                <mat-option *ngFor="let option of filteredOptions$ | async" [value]="option">
+                    {{option}}
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+        <button class="btn btn-primary" (click)="addSelectedPokemon()"><i class="bi bi-plus-lg"></i>Add</button>
+    </form>
+    <ng-container *ngFor="let poke of (selectedPokemon$ | async)">
+        <div class="card">
+            <img [src]="poke.sprite" />
+            <span>{{ poke.name | titlecase }}</span>
+        </div>
+    </ng-container>
+    <button class="btn btn-primary" (click)="createNewGame()">CREATE NEW GAME</button>
+</div>

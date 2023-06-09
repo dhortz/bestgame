@@ -1,0 +1,44 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .current-game-body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 10px;
+        border: 1px solid darkgray;
+        border-radius: 20px;
+        padding: 10px 50px 50px 50px;
+        box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.4);
+
+        .current-game-round {
+            span:first-child {
+                font-weight: bold;
+            }
+        }
+
+        .current-game-pokemon {
+            display: flex;
+
+            .card {
+                display: flex;
+                margin: 5px;
+                align-items: center;
+            }
+        }
+
+        .current-game-mode {
+            span:first-child {
+                font-weight: bold;
+            }
+        }
+
+        .current-game-players {
+            span:first-child {
+                font-weight: bold;
+            }
+        }
+    }
+}

@@ -1,0 +1,17 @@
+<div class="container">
+    <div class="winners-title">
+        <span class="title-header" [title]="title">{{ title }}</span>
+        <i class="bi bi-trophy-fill"></i>
+    </div>
+    <div class="winners-cards">
+        <ng-container *ngFor="let winner of (winners$ | async) as winners">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">GAME #{{ winner.gameNumber }}</h4>
+                    <h5 class="card-subtitle">{{ winner.endDate | date }}</h5>
+                    <p class="card-text">{{ winner.winner }}</p>
+                </div>
+            </div>
+        </ng-container>
+    </div>
+</div>

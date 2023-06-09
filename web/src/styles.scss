@@ -1,0 +1,40 @@
+@import "~bootstrap-icons/font/bootstrap-icons.css";
+
+@font-face {
+    font-family: "Titillium Web";
+    src: url("./assets/fonts/TitilliumWeb-Regular.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    font-family: "Titillium Web", sans-serif !important;
+}
+
+.bg-container {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.title-header {
+    font-size: xx-large;
+    font-weight: bold;
+}
+
+.header {
+    display: flex;
+    justify-content: center;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
