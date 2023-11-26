@@ -13,7 +13,7 @@ export class GamesSearchComponent {
 
     readonly dateFormat = "dd/MM/YYYY";
 
-    readonly displayedColumns = ["gameNumber", "winner", "roundsPlayed", "playersParticipated", "beginDate", "endDate"]
+    readonly displayedColumns = ["gameNumber", "winner", "totalPlayers", "beginDate"]
 
     gamesDataSource$ = this.dataService.getGames();
 

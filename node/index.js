@@ -13,6 +13,7 @@ app.use(bodyParser.json());
 
 const playerController = require('./controllers/PlayerController');
 const gameController = require('./controllers/GameController');
+const resultsController = require('./controllers/ResultsController');
 
 // connect to the database
 mongoose.connect('mongodb://127.0.0.1:27017/bestgame', {
@@ -28,6 +29,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/bestgame', {
 // player related endpoints
 app.use('/api/players', playerController);
 app.use('/api/games', gameController);
+app.use('/api/results', resultsController);
 
 // start the server
 app.listen(3000, () => {

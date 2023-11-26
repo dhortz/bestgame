@@ -1,8 +1,6 @@
 export interface Game {
     gameNumber: number;
     winner: any;
-    roundsPlayed: number;
-    playersParticipated: number;
+    totalPlayers: number;
     beginDate: Date;
-    endDate: Date;
 }

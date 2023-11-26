@@ -7,11 +7,7 @@ const gameSchema = new Schema({
         required: true,
         unique: true
     },
-    roundsPlayed: {
-        type: Number,
-        default: 0
-    },
-    playersParticipated: {
+    totalPlayers: {
         type: Number,
         default: 0
     },
@@ -23,10 +19,6 @@ const gameSchema = new Schema({
         type: Date,
         default: Date.now
     },
-    endDate: {
-        type: Date,
-        default: null
-    }
 });
 
 module.exports = mongoose.model('Game', gameSchema);

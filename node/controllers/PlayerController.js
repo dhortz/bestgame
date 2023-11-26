@@ -9,8 +9,7 @@ router.post('/', async (req, res) => {
         const { name } = req.body;
         const player = new Player({
             name,
-            gamesWon: 0,
-            mostRounds: 0,
+            gamesWon: 0
         });
         const savedPlayer = await player.save();
         res.status(201).json(savedPlayer);
@@ -31,14 +30,13 @@ router.get('/', async (req, res) => {
     }
 });
 
-// update player ready for next round status
-router.put('/:playerId/readyForNextRound', async (req, res) => {
+// update games won by player
+router.put('/:playerId/won', async (req, res) => {
     try {
         const { playerId } = req.params;
         const player = await Player.findByIdAndUpdate(
             playerId,
-            { readyForNextRound: true },
-            { new: true }
+            { gamesWon: gamesWon++ }
         );
 
         if (!player) {
@@ -51,5 +49,35 @@ router.put('/:playerId/readyForNextRound', async (req, res) => {
         res.status(500).send('Server Error');
     }
 });
+
+// delete all players
+router.delete('/', async (req, res) => {
+    try {
+        await Player.deleteMany();
+        res.status(200).send("All players deleted");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
+// delete player by name
+router.delete('/:name', async (req, res) => {
+    try {
+        const { name } = req.params;
+        const deletedPlayer = await Player.findOneAndDelete({ name });
+
+        if (!deletedPlayer) {
+            return res.status(404).json({ message: 'Player not found' });
+        }
+
+        res.status(200).json({ message: `Player ${name} deleted` });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
+
 
 module.exports = router;
