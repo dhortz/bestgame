@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const Player = require('../models/Player');
+const Game = require('../models/Game');
 
 // adds a new player
 router.post('/', async (req, res) => {
@@ -78,6 +79,20 @@ router.delete('/:playerName', async (req, res) => {
     }
 });
 
+// Endpoint to get players who have won games with game details
+router.get('/winners', async (req, res) => {
+    try {
+        // Find games where there is a winner
+        const gamesWithWinners = await Game.find({ winner: { $exists: true } }).populate('winner');
 
+        // Extract the winners from the games
+        const winners = gamesWithWinners.map(game => game.winner);
+
+        res.status(200).json(winners);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error => ' + err);
+    }
+});
 
 module.exports = router;

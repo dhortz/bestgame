@@ -5,13 +5,21 @@
     </div>
     <div class="winners-cards">
         <ng-container *ngFor="let winner of (winners$ | async) as winners">
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="card-title">GAME #{{ winner.gameNumber }}</h4>
-                    <h5 class="card-subtitle">{{ winner.endDate | date }}</h5>
-                    <p class="card-text">{{ winner.winner }}</p>
+            <ng-container *ngIf="winners.length > 0; else no_winners">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">GAME #{{ winner.gameNumber }}</h4>
+                        <h5 class="card-subtitle">{{ winner.endDate | date }}</h5>
+                        <p class="card-text">{{ winner.winner }}</p>
+                    </div>
                 </div>
-            </div>
+            </ng-container>
         </ng-container>
     </div>
 </div>
+
+<ng-template #no_winners>
+    <div>
+        <span>No winners yet!</span>
+    </div>
+</ng-template>

@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Game } from 'src/models/game';
+import { Player } from 'src/models/player';
 
 @Injectable({providedIn: 'root'})
 export class BestGameDataService {
@@ -22,5 +23,17 @@ export class BestGameDataService {
         const url = this.BASE_URL + this.GAMES + "/newgame";
 
         return this.http.post<Game[]>(url, { pokemon });
-    }   
+    }
+    
+    getPlayers(){
+        const url = this.BASE_URL + this.PLAYERS;
+
+        return this.http.get<Player[]>(url);
+    }
+
+    getWinners() {
+        const url = this.BASE_URL + this.PLAYERS + "/winners";
+
+        return this.http.get<Player[]>(url);
+    }
 }

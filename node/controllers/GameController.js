@@ -159,4 +159,79 @@ router.patch('/:gameNumber/player', async (req, res) => {
     }
 });
 
+// last round -> end the game
+router.patch('/:gameNumber/endgame', async (req, res) => {
+    try {
+        const { gameNumber } = req.params;
+
+        const game = await Game.findOne({ gameNumber });
+
+        if (!game) {
+            return res.status(404).json({ msg: 'Game not found with number ' + gameNumber });
+        }
+
+        // Find all rounds associated with the game
+        const rounds = await Round.find({ gameId: game._id });
+
+        // Get all players in the game
+        const players = game.players;
+
+        // Calculate total points for all players in all rounds
+        const totalPointsByPlayer = calculateTotalPointsByPlayer(players, rounds);
+
+        // Find the player with the maximum points
+        const maxPointsPlayer = getMaxPointsPlayer(totalPointsByPlayer);
+
+        game.winner = maxPointsPlayer.playerId;
+        await game.save();
+
+        const winner = await Player.findById(maxPointsPlayer.playerId);
+
+        if (winner) {
+            winner.gamesWon += 1;
+            await winner.save();
+        }
+
+        res.status(200).json({ gameNumber, totalPointsByPlayer, maxPointsPlayer });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error => ' + err);
+    }
+});
+
+function calculateTotalPointsByPlayer(players, rounds) {
+    const totalPointsByPlayer = {};
+
+    // Initialize total points for each player
+    players.forEach((player) => {
+        totalPointsByPlayer[player.toString()] = 0;
+    });
+
+    // Update total points for each player in all rounds
+    rounds.forEach(async (round) => {
+        const roundPlayerResults = await PlayerResults.find({ result: round._id });
+
+        roundPlayerResults.forEach((playerResult) => {
+            totalPointsByPlayer[playerResult.player.toString()] += playerResult.points;
+        });
+    });
+
+    return totalPointsByPlayer;
+}
+
+function getMaxPointsPlayer(totalPointsByPlayer) {
+    let maxPoints = -1;
+    let maxPointsPlayer = null;
+
+    // Iterate over players to find the one with the maximum points
+    Object.entries(totalPointsByPlayer).forEach(([playerId, points]) => {
+        if (points > maxPoints) {
+            maxPoints = points;
+            maxPointsPlayer = playerId;
+        }
+    });
+
+    return { playerId: maxPointsPlayer, points: maxPoints };
+}
+
 module.exports = router;
