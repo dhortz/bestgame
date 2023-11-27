@@ -7,10 +7,10 @@ const gameSchema = new Schema({
         required: true,
         unique: true
     },
-    totalPlayers: {
-        type: Number,
-        default: 0
-    },
+    players: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Player'
+    }],
     winner: {
         type: Schema.Types.ObjectId,
         ref: 'Player'

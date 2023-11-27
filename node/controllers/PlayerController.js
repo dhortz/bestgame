@@ -31,11 +31,11 @@ router.get('/', async (req, res) => {
 });
 
 // update games won by player
-router.put('/:playerId/won', async (req, res) => {
+router.put('/:playerName/won', async (req, res) => {
     try {
-        const { playerId } = req.params;
-        const player = await Player.findByIdAndUpdate(
-            playerId,
+        const { playerName } = req.params;
+        const player = await Player.findOneAndUpdate(
+            { name: playerName },
             { gamesWon: gamesWon++ }
         );
 
@@ -62,10 +62,10 @@ router.delete('/', async (req, res) => {
 });
 
 // delete player by name
-router.delete('/:name', async (req, res) => {
+router.delete('/:playerName', async (req, res) => {
     try {
-        const { name } = req.params;
-        const deletedPlayer = await Player.findOneAndDelete({ name });
+        const { playerName } = req.params;
+        const deletedPlayer = await Player.findOneAndDelete({ name: playerName });
 
         if (!deletedPlayer) {
             return res.status(404).json({ message: 'Player not found' });

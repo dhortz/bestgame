@@ -1,15 +1,16 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const resultsSchema = new Schema({
-    resultsId: {
+const roundSchema = new Schema({
+    roundId: {
         type: Number,
         required: true,
         unique: true
     },
     gameId: {
         type: Schema.Types.ObjectId,
-        ref: 'Game'
+        ref: 'Game',
+        required: true
     },
     day: {
         type: String,
@@ -19,12 +20,7 @@ const resultsSchema = new Schema({
         type: String,
         required: true
     },
-    playerName: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Player',
-    },
     pokemonNames: [String],
-    points: Number,
 });
 
-module.exports = mongoose.model('Results', resultsSchema);
+module.exports = mongoose.model('Round', roundSchema);

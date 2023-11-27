@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Game = require('../models/Game');
-const Results = require('../models/Results');
+const Round = require('../models/Round');
+const Player = require('../models/Player');
+const PlayerResults = require('../models/PlayerResults');
 
 // return list of games
 router.get('/', async (req, res) => {
@@ -30,19 +32,19 @@ router.post('/newgame', async (req, res) => {
             { upsert: true, new: true }
         );
 
-        const newResults = {
-            game: savedGame._id,
-            resultsId: await Results.countDocuments() + 1,
+        const newRound = {
+            gameId: savedGame._id,
+            roundId: await Round.countDocuments() + 1,
             day: "Monday",
             week: 1,
             pokemonNames: req.body.pokemon
         };
-        const savedResults = await Results.create(newResults);
+        const savedRound = await Round.create(newRound);
 
         res.status(201).json({
             gameNumber: savedGame.gameNumber,
-            resultsId: savedResults.resultsId,
-            pokemon: savedResults.pokemon
+            round: savedRound,
+            pokemon: savedRound.pokemonNames
         });
     } catch (err) {
         console.error(err);
@@ -54,7 +56,7 @@ router.post('/newgame', async (req, res) => {
 router.delete('/', async (req, res) => {
     try {
         // Delete all resultss
-        await Results.deleteMany({});
+        await Round.deleteMany({});
 
         // Delete all games
         await Game.deleteMany({});
@@ -73,7 +75,7 @@ router.delete('/:gameNumber', async (req, res) => {
         const gameNumber = req.params.gameNumber;
 
         // Delete resultss related to the game
-        await Results.deleteMany({ game: gameNumber });
+        await Round.deleteMany({ game: gameNumber });
 
         // Delete game
         const deletedGame = await Game.findOneAndDelete({ gameNumber: gameNumber });
@@ -86,6 +88,74 @@ router.delete('/:gameNumber', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
+    }
+});
+
+// get information about a game, its rounds, and player results
+router.get('/:gameNumber/details', async (req, res) => {
+    try {
+        const { gameNumber } = req.params;
+
+        
+        const game = await Game.findOne({ gameNumber })
+
+        if (!game) {
+            return res.status(404).json({ msg: 'Game not found with number ' + gameNumber });
+        }
+
+        const rounds = await Round.find({ gameId: game._id });
+        
+        // Manually populate playerResults
+        const populatedResults = await Promise.all(rounds.map(async (round) => {
+            const playerResults = await PlayerResults.find({ round: round._id }).populate('player');
+            return { ...round.toObject(), playerResults };
+        }));
+
+        // Attach the populated results to the gameDetails object
+        const gameDetailsWithPopulatedResults = { ...game.toObject(), results: populatedResults };
+
+        res.status(200).json(gameDetailsWithPopulatedResults);
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error => ' + err);
+    }
+});
+
+// add player to game
+router.patch('/:gameNumber/player', async (req, res) => {
+    try {
+        const { gameNumber } = req.params;
+        const { playerName } = req.body;
+
+        const game = await Game.findOne({ gameNumber })
+
+        if (!game) {
+            return res.status(404).json({ msg: 'Game not found with number ' + gameNumber });
+        }
+
+        // Check if the player already exists
+        let player = await Player.findOne({ name: playerName });
+
+        // If the player does not exist, create a new player
+        if (!player) {
+            player = new Player({
+                name: playerName,
+                gamesWon: 0,
+            });
+            await player.save();
+        }
+        
+        // Add the player's ID to the game's players array
+        game.players.push(player._id);
+
+        // Save the updated game
+        await game.save();
+
+        res.status(201).json({ msg: 'Player added to the game', player, game });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error => ' + err);
     }
 });
 
