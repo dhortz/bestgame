@@ -96,7 +96,7 @@ router.get('/:gameNumber/details', async (req, res) => {
     try {
         const { gameNumber } = req.params;
 
-        
+
         const game = await Game.findOne({ gameNumber })
 
         if (!game) {
@@ -104,7 +104,7 @@ router.get('/:gameNumber/details', async (req, res) => {
         }
 
         const rounds = await Round.find({ gameId: game._id });
-        
+
         // Manually populate playerResults
         const populatedResults = await Promise.all(rounds.map(async (round) => {
             const playerResults = await PlayerResults.find({ round: round._id }).populate('player');
@@ -145,14 +145,24 @@ router.patch('/:gameNumber/player', async (req, res) => {
             });
             await player.save();
         }
-        
-        // Add the player's ID to the game's players array
-        game.players.push(player._id);
 
-        // Save the updated game
-        await game.save();
+        const playersInGame = game.players;
 
-        res.status(201).json({ msg: 'Player added to the game', player, game });
+        // Check if the player is already in the game
+        const playerAlreadyInGame = playersInGame.find(playerId => playerId.equals(player._id));
+
+        if (!playerAlreadyInGame) {
+            // Add the player's ID to the game's players array
+            game.players.push(player._id);
+
+            // Save the updated game
+            await game.save();
+
+            res.status(201).json({ msg: 'Player added to the game', player, game });
+        } else {
+            res.status(500).json({ msg: 'Player already in game' });
+        }
+
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error => ' + err);
@@ -177,7 +187,9 @@ router.patch('/:gameNumber/endgame', async (req, res) => {
         const players = game.players;
 
         // Calculate total points for all players in all rounds
-        const totalPointsByPlayer = calculateTotalPointsByPlayer(players, rounds);
+        const totalPointsByPlayer = await calculateTotalPointsByPlayer(players, rounds);
+
+        console.log("totalPointsByPlayer before =>", totalPointsByPlayer);
 
         // Find the player with the maximum points
         const maxPointsPlayer = getMaxPointsPlayer(totalPointsByPlayer);
@@ -199,7 +211,57 @@ router.patch('/:gameNumber/endgame', async (req, res) => {
     }
 });
 
-function calculateTotalPointsByPlayer(players, rounds) {
+// Get total points in a game by player
+router.get('/:gameNumber/points/:playerName', async (req, res) => {
+    try {
+        const { gameNumber, playerName } = req.params;
+
+        const game = await Game.findOne({ gameNumber });
+
+        if (!game) {
+            return res.status(404).json({ msg: 'Game not found with number ' + gameNumber });
+        }
+
+        // Find all rounds associated with the game
+        const rounds = await Round.find({ gameId: game._id });
+
+        const player = await Player.find({ name: playerName })
+
+        // Calculate total points for all players in all rounds
+        const totalPointsByPlayer = await calculateTotalPointsByPlayer([player], rounds);
+
+        res.status(200).json({ gameNumber, totalPointsByPlayer });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error => ' + err);
+    }
+});
+
+// Get current game and round
+router.get('/currentgame', async (req, res) => {
+    try {
+        // Find the latest game
+        const currentGame = await Game.findOne().sort({ beginDate: -1 }).populate('players');;
+
+        if (!currentGame) {
+            return res.status(404).json({ msg: 'No games found' });
+        }
+
+        // Find the latest round of the latest game
+        const currentRound = await Round.findOne({ gameId: currentGame._id }).sort({ /* Add appropriate sorting criteria */ });
+
+        if (!currentRound) {
+            return res.status(404).json({ msg: 'No rounds found for the latest game' });
+        }
+
+        res.status(200).json({ currentGame, currentRound });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error => ' + err);
+    }
+});
+
+async function calculateTotalPointsByPlayer(players, rounds) {
     const totalPointsByPlayer = {};
 
     // Initialize total points for each player
@@ -208,13 +270,15 @@ function calculateTotalPointsByPlayer(players, rounds) {
     });
 
     // Update total points for each player in all rounds
-    rounds.forEach(async (round) => {
-        const roundPlayerResults = await PlayerResults.find({ result: round._id });
+    await Promise.all(
+        rounds.map(async (round) => {
+            const roundPlayerResults = await PlayerResults.find({ round: round._id });
 
-        roundPlayerResults.forEach((playerResult) => {
-            totalPointsByPlayer[playerResult.player.toString()] += playerResult.points;
-        });
-    });
+            roundPlayerResults.forEach((playerResult) => {
+                totalPointsByPlayer[playerResult.player.toString()] += playerResult.points;
+            });
+        })
+    );
 
     return totalPointsByPlayer;
 }
@@ -225,6 +289,8 @@ function getMaxPointsPlayer(totalPointsByPlayer) {
 
     // Iterate over players to find the one with the maximum points
     Object.entries(totalPointsByPlayer).forEach(([playerId, points]) => {
+        console.log("totalPointsByPlayer =>", totalPointsByPlayer);
+
         if (points > maxPoints) {
             maxPoints = points;
             maxPointsPlayer = playerId;

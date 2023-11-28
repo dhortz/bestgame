@@ -2,29 +2,28 @@
     <span>Current game</span>
 </div>
 
-<div class="current-game-body">
-    <div class="current-game-round">
-        <span>Round #: </span>
-        <span>{{ roundNumber }}</span>
-    </div>
+<ng-container *ngIf="(currentGame$ | async) as currentGame">
+    <div class="current-game-body">
+        <div class="current-game-round">
+            <span>Round: </span>
+            <span>{{ currentGame.currentRound.day }} of week no.{{ currentGame.currentRound.week }}</span>
+        </div>
 
-    <div class="current-game-pokemon">
-        <ng-container *ngFor="let poke of (currentPokemon$ | async)">
-            <div class="card">
-                <img [src]="poke.sprite" />
-                <span>{{ poke.name | titlecase }}</span>
-            </div>
-        </ng-container>
+        <div class="current-game-pokemon">
+            <ng-container *ngFor="let poke of (currentPokemon$ | async)">
+                <div class="card">
+                    <img [src]="poke.sprite" />
+                    <span>{{ poke.name | titlecase }}</span>
+                </div>
+            </ng-container>
 
-    </div>
+        </div>
 
-    <div class="current-game-mode">
-        <span>Mode: </span>
-        <span>2 of each Pokémon</span>
+        <div class="current-game-players">
+            <span>Active players: </span>
+            <ng-container *ngFor="let player of currentGame.currentGame.players">
+                <span>{{ player.name }}</span>
+            </ng-container>
+        </div>
     </div>
-
-    <div class="current-game-players">
-        <span>Active players: </span>
-        <span>{{ currentPlayers }}</span>
-    </div>
-</div>
+</ng-container>

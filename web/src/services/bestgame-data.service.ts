@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { CurrentGame } from 'src/models/current-game';
 import { Game } from 'src/models/game';
 import { Player } from 'src/models/player';
 
@@ -35,5 +36,11 @@ export class BestGameDataService {
         const url = this.BASE_URL + this.PLAYERS + "/winners";
 
         return this.http.get<Player[]>(url);
+    }
+
+    getCurrentGame(){
+        const url = this.BASE_URL + this.GAMES + "/currentgame";
+
+        return this.http.get<CurrentGame>(url);
     }
 }

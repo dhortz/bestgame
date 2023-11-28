@@ -1,6 +1,8 @@
+import { Player } from "./player";
+
 export interface Game {
     gameNumber: number;
     winner: any;
-    totalPlayers: number;
+    players: Player[];
     beginDate: Date;
 }
