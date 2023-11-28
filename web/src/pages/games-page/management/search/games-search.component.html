@@ -15,12 +15,19 @@
     
         <ng-container matColumnDef="winner">
             <th mat-header-cell *matHeaderCellDef>Winner</th>
-            <td mat-cell *matCellDef="let element"> {{element.winner}} </td>
+            <td mat-cell *matCellDef="let element">
+                <ng-container *ngIf="element.winner; else no_winner">
+                    {{element.winner}}
+                </ng-container>
+                <ng-template #no_winner>
+                    No winner yet!
+                </ng-template>
+            </td>
         </ng-container>
     
         <ng-container matColumnDef="totalPlayers">
             <th mat-header-cell *matHeaderCellDef># of players</th>
-            <td mat-cell *matCellDef="let element"> {{element.totalPlayers}} </td>
+            <td mat-cell *matCellDef="let element"> {{element.players | countPlayers }} </td>
         </ng-container>
 
         <ng-container matColumnDef="beginDate">
