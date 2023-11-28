@@ -1,11 +1,28 @@
 :host {
     .poke-selection {
         display: flex;
+        flex-direction: column;
+        justify-items: center;
+        align-items: center;
+
+        form {
+            justify-items: center;
+        }
+    }
+
+    .actions {
+        .btn:first-child {
+            margin-right: 10px;
+        }
     }
 
     .card {
         display: flex;
-        margin: 5px;
         align-items: center;
+        padding: 0px 10px 10px 10px;
+    }
+
+    .btn-add {
+        margin-left: 10px;
     }
 }
