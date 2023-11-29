@@ -13,7 +13,7 @@ import { PokeApiService } from 'src/services/pokeapi.service';
     styleUrls: ['./games-create.component.scss']
 })
 
-export class GamesCreateComponent {
+export class GamesCreatePageComponent {
 
     @HostBinding('class.bg-container') bgContainer = true;
 

@@ -6,9 +6,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
-import { GamesCreateComponent } from './games-create.component';
+import { GamesCreatePageComponent } from './games-create.component';
 
-export { GamesCreateComponent } from './games-create.component';
+export { GamesCreatePageComponent } from './games-create.component';
 
 @NgModule({
     imports: [
@@ -20,8 +20,8 @@ export { GamesCreateComponent } from './games-create.component';
         ReactiveFormsModule,
         BrowserAnimationsModule
     ],
-    exports: [GamesCreateComponent],
-    declarations: [GamesCreateComponent],
+    exports: [GamesCreatePageComponent],
+    declarations: [GamesCreatePageComponent],
     providers: [],
 })
-export class GamesCreateModule { }
+export class GamesCreatePageModule { }

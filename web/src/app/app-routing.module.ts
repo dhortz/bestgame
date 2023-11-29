@@ -1,8 +1,9 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { GamesPageComponent } from 'src/pages/games-page/games-page.component';
-import { GamesCreateComponent } from 'src/pages/games-page/management/create/games-create.module';
-import { GamesSearchComponent } from 'src/pages/games-page/management/search/games-search.module';
+import { GamesCreatePageComponent } from 'src/pages/games-page/management/create/games-create.module';
+import { CurrentGamePageComponent } from 'src/pages/games-page/management/current/current-game-page.module';
+import { GamesSearchPageComponent } from 'src/pages/games-page/management/search/games-search.module';
 import { HomePageComponent } from 'src/pages/home-page/home-page.component';
 import { WinnersPageComponent } from 'src/pages/winners-page/winners-page.component';
 
@@ -27,11 +28,15 @@ const routes: Routes = [
         children: [
             {
                 path: "",
-                component: GamesSearchComponent
+                component: GamesSearchPageComponent
             },
             {
                 path: "new",
-                component: GamesCreateComponent
+                component: GamesCreatePageComponent
+            },
+            {
+                path: "current",
+                component: CurrentGamePageComponent
             }
         ]
     }

@@ -17,6 +17,12 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" [routerLink]="['/games/current']" routerLinkActive="active">
+                        <i class="bi bi-dpad-fill"></i>
+                        Game
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" [routerLink]="['/winners']" routerLinkActive="active">
                         <i class="bi bi-trophy-fill"></i>
                         Winners
@@ -25,7 +31,7 @@
                 <li class="nav-item">
                     <a class="nav-link" [routerLink]="['/games']" routerLinkActive="active">
                         <i class="bi bi-list-ul"></i>
-                        Games
+                        History
                     </a>
                 </li>
             </ul>

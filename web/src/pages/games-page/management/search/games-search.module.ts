@@ -3,10 +3,10 @@ import { BrowserModule } from '@angular/platform-browser';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 
-import { GamesSearchComponent } from './games-search.component';
+import { GamesSearchPageComponent } from './games-search.component';
 import { CountPlayersPipe } from './count-players.pipe';
 
-export { GamesSearchComponent } from './games-search.component';
+export { GamesSearchPageComponent } from './games-search.component';
 
 @NgModule({
     imports: [
@@ -14,11 +14,11 @@ export { GamesSearchComponent } from './games-search.component';
         MatTableModule,
         MatPaginatorModule
     ],
-    exports: [GamesSearchComponent],
+    exports: [GamesSearchPageComponent],
     declarations: [
-        GamesSearchComponent,
+        GamesSearchPageComponent,
         CountPlayersPipe
     ],
     providers: [],
 })
-export class GamesSearchModule { }
+export class GamesSearchPageModule { }

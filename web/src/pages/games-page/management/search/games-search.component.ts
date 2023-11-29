@@ -7,7 +7,7 @@ import { BestGameDataService } from 'src/services/bestgame-data.service';
     templateUrl: 'games-search.component.html',
 })
 
-export class GamesSearchComponent {
+export class GamesSearchPageComponent {
 
     @HostBinding('class.bg-container') bgContainer = true;
 
