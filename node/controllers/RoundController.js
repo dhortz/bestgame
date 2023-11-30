@@ -60,7 +60,7 @@ router.post('/:roundId/:playerName', async (req, res) => {
     try {
         const { roundId, playerName } = req.params;
 
-        const { points } = req.body;
+        const { pokemonResults } = req.body;
 
         // Find the player by name
         const player = await Player.findOne({ name: playerName });
@@ -72,17 +72,38 @@ router.post('/:roundId/:playerName', async (req, res) => {
             return res.status(404).json({ msg: 'Player or round not found' });
         }
 
+        // Calculate roundPoints by summing the points in pokemonResults
+        const roundPoints = pokemonResults.reduce((sum, pokemon) => sum + pokemon.points, 0);
+
         // Create a new PlayerResult document
         const playerResult = new PlayerResults({
             player: player._id,
             round: round._id,
-            points,
+            pokemonResults,
+            roundPoints
         });
 
         // Save the PlayerResult document
         const savedPlayerResult = await playerResult.save();
 
         res.status(201).json(savedPlayerResult);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error => ' + err);
+    }
+});
+
+// delete all player results for a specific round
+router.delete('/:roundId', async (req, res) => {
+    try {
+        const { roundId } = req.params;
+
+        const round = await Round.find({ roundId });
+
+        // Delete all PlayerResults for the specified round
+        await PlayerResults.deleteMany({ round: round._id });
+
+        res.status(200).json({ msg: 'All PlayerResults for the specified round deleted successfully' });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error => ' + err);

@@ -1,7 +1,5 @@
-import { Round } from "./round";
-
 interface RoundsWithPoints {
-    round: Round;
+    round: number;
     points: number;
 }
 

@@ -55,12 +55,14 @@ router.post('/newgame', async (req, res) => {
 // deletes all games
 router.delete('/', async (req, res) => {
     try {
-        // Delete all resultss
+        // Delete all results
+        await PlayerResults.deleteMany({});
+
+        // Delete all rounds
         await Round.deleteMany({});
 
         // Delete all games
         await Game.deleteMany({});
-
 
         res.status(200).json({ message: 'All games and results deleted' });
     } catch (err) {
@@ -111,11 +113,13 @@ router.get('/:gameNumber/details', async (req, res) => {
             const playerResults = await PlayerResults.find({ round: round._id }).populate('player');
 
             return playerResults.map((result) => ({
+                game: game.gameNumber,
                 player: result.player.name,
                 totalPoints: totalPointsByPlayer[result.player._id],
                 results: {
                     round: round.roundId,
-                    points: result.points,
+                    pokemonResults: result.pokemonResults,
+                    roundPoints: result.roundPoints,
                 },
             }));
         });
@@ -282,7 +286,7 @@ async function calculateTotalPointsByPlayer(players, rounds) {
             const roundPlayerResults = await PlayerResults.find({ round: round._id });
 
             roundPlayerResults.forEach((playerResult) => {
-                totalPointsByPlayer[playerResult.player.toString()] += playerResult.points;
+                totalPointsByPlayer[playerResult.player.toString()] += playerResult.roundPoints;
             });
         })
     );

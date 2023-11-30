@@ -12,7 +12,22 @@ const playerResultSchema = new Schema({
         ref: 'Round',
         required: true,
     },
-    points: Number
+    pokemonResults: [
+        {
+            pokemon: {
+                type: String,
+                required: true,
+            },
+            points: {
+                type: Number,
+                required: true,
+            },
+        },
+    ],
+    roundPoints: {
+        type: Number,
+        required: true
+    }
 });
 
 module.exports = mongoose.model('PlayerResults', playerResultSchema);
