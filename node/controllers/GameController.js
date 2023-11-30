@@ -109,19 +109,26 @@ router.get('/:gameNumber/details', async (req, res) => {
         const totalPointsByPlayer = await calculateTotalPointsByPlayer(game.players, rounds);
 
         // Manually populate playerResults
-        const resultsByPlayerPromises = rounds.map(async (round) => {
-            const playerResults = await PlayerResults.find({ round: round._id }).populate('player');
+        const resultsByPlayerPromises = game.players.map(async (player) => {
+            const playerResults = await PlayerResults.find({ player, round: { $in: rounds } }).populate('round');
 
-            return playerResults.map((result) => ({
+            const uniqueRounds = [...new Set(playerResults.map((result) => result.round._id))];
+
+            const currentPlayer = await Player.findById(player);
+
+            return {
                 game: game.gameNumber,
-                player: result.player.name,
-                totalPoints: totalPointsByPlayer[result.player._id],
-                results: {
-                    round: round.roundId,
-                    pokemonResults: result.pokemonResults,
-                    roundPoints: result.roundPoints,
-                },
-            }));
+                player: currentPlayer.name,
+                totalPoints: totalPointsByPlayer[player._id],
+                results: uniqueRounds.map((roundId) => {
+                    const result = playerResults.find((res) => res.round._id.toString() === roundId.toString());
+                    return {
+                        round: result.round.roundId,
+                        pokemonResults: result.pokemonResults,
+                        roundPoints: result.roundPoints,
+                    };
+                }),
+            };
         });
 
         const resultsByPlayer = await Promise.all(resultsByPlayerPromises);
