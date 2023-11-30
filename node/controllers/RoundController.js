@@ -12,8 +12,6 @@ router.get('/:gameNumber', async (req, res) => {
 
         const game = await Game.findOne({ gameNumber });
 
-        console.log("Game =>", game);
-
         const round = await Round.find({ gameId: game._id });
         if (!round) {
             return res.status(404).json({ msg: 'Round not found in game #' + gameNumber });

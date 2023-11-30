@@ -96,8 +96,7 @@ router.get('/:gameNumber/details', async (req, res) => {
     try {
         const { gameNumber } = req.params;
 
-
-        const game = await Game.findOne({ gameNumber })
+        const game = await Game.findOne({ gameNumber });
 
         if (!game) {
             return res.status(404).json({ msg: 'Game not found with number ' + gameNumber });
@@ -105,16 +104,26 @@ router.get('/:gameNumber/details', async (req, res) => {
 
         const rounds = await Round.find({ gameId: game._id });
 
+        const totalPointsByPlayer = await calculateTotalPointsByPlayer(game.players, rounds);
+
         // Manually populate playerResults
-        const populatedResults = await Promise.all(rounds.map(async (round) => {
+        const resultsByPlayerPromises = rounds.map(async (round) => {
             const playerResults = await PlayerResults.find({ round: round._id }).populate('player');
-            return { ...round.toObject(), playerResults };
-        }));
 
-        // Attach the populated results to the gameDetails object
-        const gameDetailsWithPopulatedResults = { ...game.toObject(), results: populatedResults };
+            return playerResults.map((result) => ({
+                player: result.player.name,
+                totalPoints: totalPointsByPlayer[result.player._id],
+                results: {
+                    round: round.roundId,
+                    points: result.points,
+                },
+            }));
+        });
 
-        res.status(200).json(gameDetailsWithPopulatedResults);
+        const resultsByPlayer = await Promise.all(resultsByPlayerPromises);
+        const flattenedResults = resultsByPlayer.flat();
+
+        res.status(200).json(flattenedResults);
 
     } catch (err) {
         console.error(err);
@@ -188,8 +197,6 @@ router.patch('/:gameNumber/endgame', async (req, res) => {
 
         // Calculate total points for all players in all rounds
         const totalPointsByPlayer = await calculateTotalPointsByPlayer(players, rounds);
-
-        console.log("totalPointsByPlayer before =>", totalPointsByPlayer);
 
         // Find the player with the maximum points
         const maxPointsPlayer = getMaxPointsPlayer(totalPointsByPlayer);
@@ -289,7 +296,6 @@ function getMaxPointsPlayer(totalPointsByPlayer) {
 
     // Iterate over players to find the one with the maximum points
     Object.entries(totalPointsByPlayer).forEach(([playerId, points]) => {
-        console.log("totalPointsByPlayer =>", totalPointsByPlayer);
 
         if (points > maxPoints) {
             maxPoints = points;
