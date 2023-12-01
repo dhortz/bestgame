@@ -13,9 +13,7 @@ export class WinnersComponent {
     
     @Input() title = "Winners!";
 
-    gameWinners$ = this.dataService.getWinners().pipe(
-        tap(winners => console.log("Winners =>", winners))
-    );
+    gameWinners$ = this.dataService.getWinners();
 
     constructor(
         private dataService: BestGameDataService,
