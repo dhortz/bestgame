@@ -266,7 +266,9 @@ router.get('/currentgame', async (req, res) => {
         }
 
         // Find the latest round of the latest game
-        const currentRound = await Round.findOne({ gameId: currentGame._id }).sort({ /* Add appropriate sorting criteria */ });
+        const currentRound = await Round.findOne({ gameId: currentGame._id })
+            .sort({ roundId: -1 })
+            .limit(1);
 
         if (!currentRound) {
             return res.status(404).json({ msg: 'No rounds found for the latest game' });

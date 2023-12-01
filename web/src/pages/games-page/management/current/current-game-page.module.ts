@@ -5,6 +5,8 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { CurrentGamePageComponent } from './current-game-page.component';
 import { CurrentGameModule } from 'src/components/games/current-game/current-game.module';
 import { CommonModule } from '@angular/common';
+import { ParsePokemonNamePipe } from './parse-pokemon-name';
+import { MatSortModule } from '@angular/material/sort';
 
 export { CurrentGamePageComponent } from './current-game-page.component';
 
@@ -14,13 +16,15 @@ export { CurrentGamePageComponent } from './current-game-page.component';
         BrowserModule,
         MatTableModule,
         MatPaginatorModule,
+        MatSortModule,
         CurrentGameModule
     ],
     exports: [
         CurrentGamePageComponent
     ],
     declarations: [
-        CurrentGamePageComponent
+        CurrentGamePageComponent,
+        ParsePokemonNamePipe
     ],
     providers: [],
 })
