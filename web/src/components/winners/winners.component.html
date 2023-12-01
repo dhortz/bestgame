@@ -5,8 +5,8 @@
     </div>
     <div class="winners-cards">
         <ng-container *ngIf="(gameWinners$ | async) as gameWinners">
-            <ng-container *ngIf="gameWinners.length > 0; else no_winners">
-                <ng-container *ngFor="let gameWinner of gameWinners">
+            <ng-container *ngFor="let gameWinner of gameWinners">
+                <ng-container *ngIf="gameWinner.winner; else no_winners">
                     <div class="card">
                         <div class="card-body">
                             <h4 class="card-title">GAME #{{ gameWinner.gameNumber }}</h4>
