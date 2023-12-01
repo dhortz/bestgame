@@ -1,5 +1,4 @@
 import { Component, Input } from '@angular/core';
-import { map, tap } from 'rxjs';
 import { BestGameDataService } from 'src/services/bestgame-data.service';
 
 

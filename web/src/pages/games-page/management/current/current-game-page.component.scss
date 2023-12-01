@@ -14,5 +14,13 @@
 
     td {
         font-size: 1.1em;
+        text-align: center;
+    }
+
+    .header {
+        display: flex;
+        min-height: 96px;
+        align-items: center;
+        justify-content: center;
     }
 }

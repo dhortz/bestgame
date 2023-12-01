@@ -7,6 +7,7 @@ import { CurrentGameModule } from 'src/components/games/current-game/current-gam
 import { CommonModule } from '@angular/common';
 import { ParsePokemonNamePipe } from './parse-pokemon-name';
 import { MatSortModule } from '@angular/material/sort';
+import { PokemonSpritePipe } from './pokemon-sprite';
 
 export { CurrentGamePageComponent } from './current-game-page.component';
 
@@ -24,7 +25,8 @@ export { CurrentGamePageComponent } from './current-game-page.component';
     ],
     declarations: [
         CurrentGamePageComponent,
-        ParsePokemonNamePipe
+        ParsePokemonNamePipe,
+        PokemonSpritePipe
     ],
     providers: [],
 })
