@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { map, switchMap } from 'rxjs';
+import { map, tap } from 'rxjs';
 import { BestGameDataService } from 'src/services/bestgame-data.service';
 
 
@@ -13,8 +13,8 @@ export class WinnersComponent {
     
     @Input() title = "Winners!";
 
-    winners$ = this.dataService.getGames().pipe(
-        map(games => games.filter(game => game.winner))
+    gameWinners$ = this.dataService.getWinners().pipe(
+        tap(winners => console.log("Winners =>", winners))
     );
 
     constructor(

@@ -120,10 +120,10 @@ router.get('/:gameNumber/details', async (req, res) => {
                 game: game.gameNumber,
                 player: currentPlayer.name,
                 totalPoints: totalPointsByPlayer[player._id],
-                results: uniqueRounds.map((roundId) => {
+                rounds: uniqueRounds.map((roundId) => {
                     const result = playerResults.find((res) => res.round._id.toString() === roundId.toString());
                     return {
-                        round: result.round.roundId,
+                        round: result.round,
                         pokemonResults: result.pokemonResults,
                         roundPoints: result.roundPoints,
                     };

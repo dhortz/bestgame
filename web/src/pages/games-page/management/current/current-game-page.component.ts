@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, HostBinding } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { BestGameDataService } from 'src/services/bestgame-data.service';
 
 @Component({
@@ -8,7 +10,22 @@ import { BestGameDataService } from 'src/services/bestgame-data.service';
 })
 export class CurrentGamePageComponent {
 
-    
+    @HostBinding('class.bg-container') bgContainer = true;
+
+    displayedColumns$ = new BehaviorSubject<string[]>([]);
+    roundKeys$ = new BehaviorSubject<string[]>([]); 
+
+    currentGame$ = this.bestGameService.getCurrentGame().pipe(
+        map(current => current.currentGame.gameNumber)
+    );
+
+    currentGameDetails$ = this.currentGame$.pipe(
+        switchMap(currentGame => this.bestGameService.getCurrentGameDetails(currentGame)),
+        tap((details) => {
+            this.roundKeys$.next(details[0].roundKeys);
+            this.displayedColumns$.next(["player", ...details[0].roundKeys, "totalPoints"])
+        })
+    );
 
     constructor(
         private bestGameService: BestGameDataService) 

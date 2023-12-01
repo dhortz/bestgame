@@ -86,7 +86,7 @@ router.get('/winners', async (req, res) => {
         const gamesWithWinners = await Game.find({ winner: { $exists: true } }).populate('winner');
 
         // Extract the winners from the games
-        const winners = gamesWithWinners.map(game => game.winner);
+        const winners = gamesWithWinners.map(game => ({ winner: game.winner, gameNumber: game.gameNumber}));
 
         res.status(200).json(winners);
     } catch (err) {

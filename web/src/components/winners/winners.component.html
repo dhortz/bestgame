@@ -4,13 +4,13 @@
         <i class="bi bi-trophy-fill"></i>
     </div>
     <div class="winners-cards">
-        <ng-container *ngIf="(winners$ | async) as winners">
-            <ng-container *ngIf="winners.length > 0; else no_winners">
-                <ng-container *ngFor="let winner of winners">
+        <ng-container *ngIf="(gameWinners$ | async) as gameWinners">
+            <ng-container *ngIf="gameWinners.length > 0; else no_winners">
+                <ng-container *ngFor="let gameWinner of gameWinners">
                     <div class="card">
                         <div class="card-body">
-                            <h4 class="card-title">GAME #{{ winner.gameNumber }}</h4>
-                            <p class="card-text">{{ winner.winner }}</p>
+                            <h4 class="card-title">GAME #{{ gameWinner.gameNumber }}</h4>
+                            <p class="card-text">{{ gameWinner.winner.name }}</p>
                         </div>
                     </div>
                 </ng-container>
