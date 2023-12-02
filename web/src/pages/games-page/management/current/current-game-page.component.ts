@@ -1,4 +1,5 @@
 import { Component, HostBinding } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { BestGameDataService } from 'src/services/bestgame-data.service';
@@ -13,7 +14,7 @@ export class CurrentGamePageComponent {
     @HostBinding('class.bg-container') bgContainer = true;
 
     displayedColumns$ = new BehaviorSubject<string[]>([]);
-    roundKeys$ = new BehaviorSubject<string[]>([]); 
+    roundKeys$ = new BehaviorSubject<string[]>([]);
 
     currentGame$ = this.bestGameService.getCurrentGame().pipe(
         map(current => current.currentGame.gameNumber)
@@ -28,6 +29,12 @@ export class CurrentGamePageComponent {
     );
 
     constructor(
-        private bestGameService: BestGameDataService) 
-    { }
+        private bestGameService: BestGameDataService,
+        private router: Router,
+        private route: ActivatedRoute
+    ) { }
+
+    navigateToNewRound() {
+        this.router.navigate(["games/new/round"]);
+    }
 }

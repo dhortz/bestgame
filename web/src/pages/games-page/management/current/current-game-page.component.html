@@ -1,6 +1,9 @@
 <bestgame-current-game></bestgame-current-game>
 
 <ng-container *ngIf="(currentGameDetails$ | async) as gameDetails">
+    <div class="actions">
+        <button class="btn btn-primary btn-sm pull-right" (click)="navigateToNewRound()">New round!</button>
+    </div>
     <table mat-table [dataSource]="gameDetails" class="mat-elevation-z8 table table-striped table-hover">
 
         <ng-container matColumnDef="player">
@@ -20,7 +23,12 @@
                         <img [src]="roundKey | parsePokemonName | pokemonSprite | async" />
                     </div>
                 </th>
-                <td mat-cell *matCellDef="let element"> {{ element[roundKey] }} </td>
+                <td mat-cell *matCellDef="let element">
+                    <ng-container *ngIf="element[roundKey]; else no_points">
+                        {{ element[roundKey] }}
+                    </ng-container>
+                    <ng-template #no_points>-</ng-template>
+                </td>
             </ng-container>
         </ng-container>
 

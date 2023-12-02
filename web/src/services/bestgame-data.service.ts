@@ -6,11 +6,13 @@ import { Game } from 'src/models/game';
 import { GameWinners } from 'src/models/game-winners';
 import { Player } from 'src/models/player';
 import { Results } from 'src/models/results';
+import { Round } from 'src/models/round';
 
 @Injectable({ providedIn: 'root' })
 export class BestGameDataService {
     readonly BASE_URL = "http://localhost:3000/api";
     readonly GAMES = "/games";
+    readonly ROUNDS = "/rounds";
     readonly PLAYERS = "/players";
 
     constructor(
@@ -26,7 +28,7 @@ export class BestGameDataService {
     createNewGame(pokemon: string[]) {
         const url = this.BASE_URL + this.GAMES + "/newgame";
 
-        return this.http.post<Game[]>(url, { pokemon });
+        return this.http.post<Game>(url, { pokemon });
     }
 
     getPlayers() {
@@ -69,5 +71,11 @@ export class BestGameDataService {
                 return adaptResults;
             })
         );
+    }
+
+    addNewRound(pokemon: string[]){
+        const url = this.BASE_URL + this.ROUNDS;
+
+        return this.http.post<Round>(url, { pokemon });
     }
 }

@@ -10,7 +10,7 @@ import { BestGameDataService } from 'src/services/bestgame-data.service';
 
 export class WinnersComponent {
     
-    @Input() title = "Winners!";
+    @Input() title = "Hall of Fame";
 
     gameWinners$ = this.dataService.getWinners();
 

@@ -9,17 +9,15 @@
 
     th {
         font-weight: bold;
-        font-size: 1.1em;
     }
 
     td {
-        font-size: 1.1em;
         text-align: center;
     }
 
     .header {
         display: flex;
-        min-height: 96px;
+        height: 50px;
         align-items: center;
         justify-content: center;
     }
