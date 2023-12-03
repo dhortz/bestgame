@@ -28,7 +28,7 @@ router.get('/:gameNumber', async (req, res) => {
 // create a new round entry (aka new day)
 router.post('/', async (req, res) => {
     try {
-        const { gameNumber, day, week, pokemonNames } = req.body;
+        const { gameNumber, pokemonNames } = req.body;
 
         // Check if the game exists
         const game = await Game.findOne({ gameNumber });
@@ -36,12 +36,23 @@ router.post('/', async (req, res) => {
             return res.status(404).json({ msg: 'Game not found' });
         }
 
+        // Find the last round of the game
+        const lastRound = await Round.findOne({ gameId: game._id }).sort({ roundId: -1 });
+
+        if (lastRound.day === "Sunday" && lastRound.week === 2) {
+            return res.status(500).json({ msg: "Can't add a new round! We're in the last day of the game!" });
+        }
+
+        // Calculate the next day and week
+        const nextDay = lastRound ? getNextDay(lastRound.day) : 'Monday';
+        const nextWeek = lastRound ? getNextWeek(lastRound.week) : '1';
+
         // Create a new Round document
         const round = new Round({
             roundId: await Round.countDocuments() + 1,
             gameId: game._id,
-            day,
-            week,
+            day: nextDay,
+            week: nextWeek,
             pokemonNames,
         });
 
@@ -109,5 +120,24 @@ router.delete('/:roundId', async (req, res) => {
         res.status(500).send('Server Error => ' + err);
     }
 });
+
+// Helper function to get the next day (e.g., Monday -> Tuesday)
+function getNextDay(currentDay) {
+    // Add your logic to determine the next day
+    // This can be based on a predefined order or a calendar
+    // For simplicity, let's assume a predefined order: Monday -> Tuesday -> ... -> Sunday -> Monday
+    const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const currentIndex = daysOfWeek.indexOf(currentDay);
+    const nextIndex = (currentIndex + 1) % daysOfWeek.length;
+    return daysOfWeek[nextIndex];
+}
+
+// Helper function to get the next week (e.g., '1' -> '2')
+function getNextWeek(currentWeek) {
+    // Add your logic to determine the next week
+    // This can be based on the current week or other criteria
+    // For simplicity, let's assume incrementing the current week
+    return (parseInt(currentWeek) + 1).toString();
+}
 
 module.exports = router;
