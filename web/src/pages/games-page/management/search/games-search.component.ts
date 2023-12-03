@@ -9,8 +9,6 @@ import { BestGameDataService } from 'src/services/bestgame-data.service';
 
 export class GamesSearchPageComponent {
 
-    @HostBinding('class.bg-container') bgContainer = true;
-
     readonly dateFormat = "dd/MM/YYYY";
 
     readonly displayedColumns = ["gameNumber", "winner", "totalPlayers", "beginDate"]

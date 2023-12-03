@@ -11,8 +11,6 @@ import { BestGameDataService } from 'src/services/bestgame-data.service';
 })
 export class CurrentGamePageComponent {
 
-    @HostBinding('class.bg-container') bgContainer = true;
-
     displayedColumns$ = new BehaviorSubject<string[]>([]);
     roundKeys$ = new BehaviorSubject<string[]>([]);
 

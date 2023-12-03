@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostBinding, OnInit } from '@angular/core';
 
 @Component({
     selector: 'bestgame-homepage',
@@ -7,5 +7,5 @@ import { Component, OnInit } from '@angular/core';
 })
 
 export class HomePageComponent {
-    
+    @HostBinding('class.bg-container') bgContainer = true;
 }

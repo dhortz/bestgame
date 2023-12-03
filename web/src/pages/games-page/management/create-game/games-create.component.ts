@@ -11,8 +11,6 @@ import { BestGameDataService } from 'src/services/bestgame-data.service';
 
 export class GamesCreatePageComponent {
 
-    @HostBinding('class.bg-container') bgContainer = true;
-
     selectedPokemon: string[] = [];
 
     constructor(

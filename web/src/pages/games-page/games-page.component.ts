@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostBinding } from '@angular/core';
 
 @Component({
     selector: 'bestgame-games-page',
@@ -6,5 +6,5 @@ import { Component } from '@angular/core';
 })
 
 export class GamesPageComponent {
-    
+    @HostBinding('class.bg-container') bgContainer = true;
 }
