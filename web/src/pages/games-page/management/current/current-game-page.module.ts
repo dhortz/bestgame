@@ -5,7 +5,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { CurrentGamePageComponent } from './current-game-page.component';
 import { CurrentGameModule } from 'src/components/games/current-game/current-game.module';
 import { CommonModule } from '@angular/common';
-import { ParsePokemonNamePipe } from './parse-pokemon-name';
+import { ParseRoundKeysPipe } from './parse-round-keys';
 import { MatSortModule } from '@angular/material/sort';
 import { PokemonSpritePipe } from './pokemon-sprite';
 
@@ -25,7 +25,7 @@ export { CurrentGamePageComponent } from './current-game-page.component';
     ],
     declarations: [
         CurrentGamePageComponent,
-        ParsePokemonNamePipe,
+        ParseRoundKeysPipe,
         PokemonSpritePipe
     ],
     providers: [],
