@@ -5,6 +5,7 @@ import { BestGameDataService } from 'src/services/bestgame-data.service';
 @Component({
     selector: 'bestgame-games-search',
     templateUrl: 'games-search.component.html',
+    styleUrls: ['./games-search.component.scss']
 })
 
 export class GamesSearchPageComponent {
