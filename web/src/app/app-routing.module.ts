@@ -28,7 +28,7 @@ const routes: Routes = [
         pathMatch: "prefix",
         children: [
             {
-                path: "",
+                path: "history",
                 component: GamesSearchPageComponent
             },
             {

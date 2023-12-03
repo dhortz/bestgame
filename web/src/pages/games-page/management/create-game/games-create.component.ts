@@ -22,7 +22,7 @@ export class GamesCreatePageComponent {
     ) {}
 
     goBackToGamesList() {
-        this.router.navigate(["games"]);
+        this.router.navigate(["games/history"]);
     }
 
     createNewGame(){

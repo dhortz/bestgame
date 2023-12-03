@@ -25,6 +25,6 @@ export class GamesSearchPageComponent {
     }
 
     navigateToNewGame() {
-        this.router.navigate(["new/game"], { relativeTo: this.route });
+        this.router.navigate(["../new/game"], { relativeTo: this.route });
     }
 }
