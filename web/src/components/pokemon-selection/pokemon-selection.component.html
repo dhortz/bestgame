@@ -10,9 +10,13 @@
     </mat-form-field>
     <button class="btn btn-add" (click)="addSelectedPokemon()"><i class="bi bi-plus-lg"></i>Add</button>
 </form>
-<ng-container *ngFor="let poke of (selectedPokemon$ | async)">
-    <div class="card">
-        <img [src]="poke.sprite" />
-        <span>{{ poke.name | titlecase }}</span>
+<ng-container *ngIf="(selectedPokemon$ | async) as selectedPokemon">
+    <div class="selected-pokemon">
+        <ng-container *ngFor="let poke of selectedPokemon">
+            <div class="card">
+                <img [src]="poke.sprite" />
+                <span>{{ poke.name | titlecase }}</span>
+            </div>
+        </ng-container>
     </div>
 </ng-container>

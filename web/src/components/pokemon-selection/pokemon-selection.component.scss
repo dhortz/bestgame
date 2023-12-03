@@ -8,13 +8,20 @@
         justify-items: center;
     }
 
-    .card {
+    .selected-pokemon {
         display: flex;
-        align-items: center;
-        padding: 0px 10px 10px 10px;
+        width: 25%;
+        justify-content: space-evenly;
+
+        .card {
+            display: flex;
+            align-items: center;
+            padding: 0px 10px 10px 10px;
+        }
     }
 
     .btn-add {
         margin-left: 10px;
+        margin-bottom: 16px;
     }
 }
