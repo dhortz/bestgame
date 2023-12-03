@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { GamesPageComponent } from './games-page.component';
-import { GamesModule } from 'src/components/games/games.module';
-import { GamesManagementModule } from './management/games-management.module';
 import { RouterModule } from '@angular/router';
+import { CurrentGameModule } from 'src/components/current-game/current-game.module';
+import { GamesPageComponent } from './games-page.component';
+import { GamesManagementModule } from './management/games-management.module';
 
 @NgModule({
     imports: [
         CommonModule,
         RouterModule,
-        GamesModule,
+        CurrentGameModule,
         GamesManagementModule
     ],
     exports: [

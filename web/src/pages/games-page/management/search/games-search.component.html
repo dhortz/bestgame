@@ -4,7 +4,7 @@
 
 <ng-container *ngIf="gamesDataSource$ | async as gamesDataSource">
     <div class="actions">
-        <button class="btn btn-sm pull-right" (click)="navigateToNewGame()">New game!</button>
+        <button class="btn btn-sm pull-right" (click)="navigateToNewGame()">start new game</button>
     </div>
     <table mat-table [dataSource]="gamesDataSource" class="mat-elevation-z8 table table-striped table-hover">    
         
