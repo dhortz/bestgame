@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { CurrentGameModule } from 'src/components/games/current-game/current-game.module';
+import { CurrentGameModule } from 'src/components/current-game/current-game.module';
 import { WinnersModule } from 'src/components/winners/winners.module';
 import { HomePageComponent } from './home-page.component';
 

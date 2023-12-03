@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { CurrentGamePageComponent } from './current-game-page.component';
-import { CurrentGameModule } from 'src/components/games/current-game/current-game.module';
+import { CurrentGameModule } from 'src/components/current-game/current-game.module';
 import { CommonModule } from '@angular/common';
 import { ParseRoundKeysPipe } from './parse-round-keys';
 import { MatSortModule } from '@angular/material/sort';
