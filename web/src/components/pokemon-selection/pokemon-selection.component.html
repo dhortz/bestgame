@@ -8,7 +8,7 @@
             </mat-option>
         </mat-autocomplete>
     </mat-form-field>
-    <button class="btn btn-primary btn-add" (click)="addSelectedPokemon()"><i class="bi bi-plus-lg"></i>Add</button>
+    <button class="btn btn-add" (click)="addSelectedPokemon()"><i class="bi bi-plus-lg"></i>Add</button>
 </form>
 <ng-container *ngFor="let poke of (selectedPokemon$ | async)">
     <div class="card">

@@ -25,5 +25,9 @@
                 <span>{{ player.name }}</span><br>
             </ng-container>
         </div>
+
+        <div *ngIf="showButton">
+            <button class="btn btn-sm" (click)="goToCurrentGame()">Go to current game!</button>
+        </div>
     </div>
 </ng-container>

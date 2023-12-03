@@ -17,12 +17,22 @@ body {
     font-family: "Titillium Web", sans-serif !important;
 }
 
+.btn {
+    background-color: #2f2f2f !important;
+    color: white !important;
+}
+
+.btn:hover {
+    background-color: #9f9f9f !important;
+    color: black !important;
+}
+
 .bg-container {
     display: flex;
     flex-direction: column;
     padding: 20px;
     height: calc(100vh - 76px);
-    background: url("./assets/images/pokemon-wallpaper.jpg") center center/cover;
+    background: url("./assets/images/pokemon-wallpaper.jpg") center center/cover fixed;
 }
 
 .title-header {
