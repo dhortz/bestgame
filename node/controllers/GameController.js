@@ -294,6 +294,8 @@ async function calculateTotalPointsByPlayer(players, rounds) {
         rounds.map(async (round) => {
             const roundPlayerResults = await PlayerResults.find({ round: round._id });
 
+            console.log("roundPlayerResults =>", roundPlayerResults);
+
             roundPlayerResults.forEach((playerResult) => {
                 totalPointsByPlayer[playerResult.player.toString()] += playerResult.roundPoints;
             });

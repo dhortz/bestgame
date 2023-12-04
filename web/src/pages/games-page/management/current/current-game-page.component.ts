@@ -1,5 +1,5 @@
-import { Component, HostBinding } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { BestGameDataService } from 'src/services/bestgame-data.service';
@@ -21,15 +21,16 @@ export class CurrentGamePageComponent {
     currentGameDetails$ = this.currentGame$.pipe(
         switchMap(currentGame => this.bestGameService.getCurrentGameDetails(currentGame)),
         tap((details) => {
-            this.roundKeys$.next(details[0].roundKeys);
-            this.displayedColumns$.next(["player", ...details[0].roundKeys, "totalPoints"])
+            if (details.length > 0) {
+                this.roundKeys$.next(details[0].roundKeys);
+                this.displayedColumns$.next(["player", ...details[0].roundKeys, "totalPoints"])
+            }
         })
     );
 
     constructor(
         private bestGameService: BestGameDataService,
-        private router: Router,
-        private route: ActivatedRoute
+        private router: Router
     ) { }
 
     navigateToNewRound() {

@@ -45,7 +45,7 @@ router.post('/', async (req, res) => {
 
         // Calculate the next day and week
         const nextDay = lastRound ? getNextDay(lastRound.day) : 'Monday';
-        const nextWeek = lastRound ? getNextWeek(lastRound.week) : '1';
+        const nextWeek = nextDay === "Monday" || lastRound.week === 2 ? 2 : 1;
 
         // Create a new Round document
         const round = new Round({
@@ -73,14 +73,37 @@ router.post('/:roundId/:playerName', async (req, res) => {
 
         const { pokemonResults } = req.body;
 
-        // Find the player by name
-        const player = await Player.findOne({ name: playerName });
-
         // Find the round by round number
         const round = await Round.findOne({ roundId });
 
-        if (!player || !round) {
-            return res.status(404).json({ msg: 'Player or round not found' });
+        if (!round) {
+            return res.status(404).json({ msg: 'Round not found' });
+        }
+
+        const game = await Game.findOne({ _id: round.gameId });
+
+        // Check if the player already exists
+        let player = await Player.findOne({ name: playerName });
+
+        // If the player does not exist, create a new player
+        if (!player) {
+            player = new Player({
+                name: playerName,
+                gamesWon: 0,
+            });
+            await player.save();
+        }
+
+        const playersInGame = game.players;
+
+        if(playersInGame.length > 0){
+            // Check if the player is already in the game
+            const playerAlreadyInGame = playersInGame.find(playerId => playerId.equals(player._id));
+            if (!playerAlreadyInGame) {
+                await addPlayerToGame(game, player);
+            }
+        } else {
+            await addPlayerToGame(game, player);
         }
 
         // Calculate roundPoints by summing the points in pokemonResults
@@ -132,12 +155,12 @@ function getNextDay(currentDay) {
     return daysOfWeek[nextIndex];
 }
 
-// Helper function to get the next week (e.g., '1' -> '2')
-function getNextWeek(currentWeek) {
-    // Add your logic to determine the next week
-    // This can be based on the current week or other criteria
-    // For simplicity, let's assume incrementing the current week
-    return (parseInt(currentWeek) + 1).toString();
+async function addPlayerToGame(game, player){
+    // Add the player's ID to the game's players array
+    game.players.push(player._id);
+
+    // Save the updated game
+    await game.save();
 }
 
 module.exports = router;

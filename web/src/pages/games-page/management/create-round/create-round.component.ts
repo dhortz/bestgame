@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { first } from 'rxjs/operators';
+import { Router } from '@angular/router';
+import { first, map, switchMap } from 'rxjs/operators';
 import { BestGameDataService } from 'src/services/bestgame-data.service';
 
 @Component({
@@ -12,9 +12,12 @@ export class CreateRoundPageComponent {
 
     selectedPokemon: string[] = [];
 
+    currentGame$ = this.bestGameService.getCurrentGame().pipe(
+        map(current => current.currentGame.gameNumber)
+    );
+
     constructor(
         private router: Router,
-        private route: ActivatedRoute,
         private bestGameService: BestGameDataService
     ) {}
 
@@ -23,7 +26,10 @@ export class CreateRoundPageComponent {
     }
 
     addNewRound() {
-        this.bestGameService.addNewRound(this.selectedPokemon).pipe(first()).subscribe();
+        this.currentGame$.pipe(
+            switchMap(currentGame => this.bestGameService.addNewRound(currentGame, this.selectedPokemon)),
+            first()
+        ).subscribe();
         this.goBackToCurrentGame();
     }
 

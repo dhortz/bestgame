@@ -17,7 +17,7 @@ const roundSchema = new Schema({
         required: true
     },
     week: {
-        type: String,
+        type: Number,
         required: true
     },
     pokemonNames: [String],

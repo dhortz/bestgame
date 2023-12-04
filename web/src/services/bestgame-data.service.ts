@@ -73,9 +73,9 @@ export class BestGameDataService {
         );
     }
 
-    addNewRound(pokemon: string[]){
+    addNewRound(gameNumber: number, pokemonNames: string[]){
         const url = this.BASE_URL + this.ROUNDS;
 
-        return this.http.post<Round>(url, { pokemon });
+        return this.http.post<Round>(url, { gameNumber, pokemonNames });
     }
 }
