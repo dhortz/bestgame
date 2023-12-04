@@ -2,7 +2,7 @@
 
 <ng-container *ngIf="(currentGameDetails$ | async) as gameDetails">
     <div class="actions">
-        <button class="btn btn-sm pull-right" [attr.disabled]="disableNewRound$ | async" (click)="navigateToNewRound()">start new round</button>
+        <button class="btn btn-sm pull-right" (click)="navigateToNewRound()">start new round</button>
     </div>
     <ng-container *ngIf="gameDetails.length > 0; else no_entries">
         <table mat-table [dataSource]="gameDetails" class="mat-elevation-z8 table table-striped table-hover">
