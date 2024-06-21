@@ -13,10 +13,7 @@
 <ng-container *ngIf="(selectedPokemon$ | async) as selectedPokemon">
     <div class="selected-pokemon">
         <ng-container *ngFor="let poke of selectedPokemon">
-            <div class="card">
-                <img [src]="poke.sprite" />
-                <span>{{ poke.name | titlecase }}</span>
-            </div>
+            <pokemon-card [pokemon]="poke"></pokemon-card>
         </ng-container>
     </div>
 </ng-container>

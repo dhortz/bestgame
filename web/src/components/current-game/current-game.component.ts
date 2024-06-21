@@ -29,7 +29,7 @@ export class CurrentGameComponent {
             }
 
             const pokemonObservables = pokemonNames.map((poke) =>
-                this.pokeApiService.getPokemon(poke.toLowerCase()).pipe(
+                this.pokeApiService.getPokemonByName(poke.toLowerCase()).pipe(
                     map((data: any) => ({
                         name: data.name,
                         sprite: data.sprites.front_default

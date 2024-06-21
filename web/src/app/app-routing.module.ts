@@ -6,6 +6,7 @@ import { CreateRoundPageComponent } from 'src/pages/games-page/management/create
 import { CurrentGamePageComponent } from 'src/pages/games-page/management/current/current-game-page.module';
 import { GamesSearchPageComponent } from 'src/pages/games-page/management/search/games-search.module';
 import { HomePageComponent } from 'src/pages/home-page/home-page.component';
+import { PokemonPageComponent } from 'src/pages/pokemon-page/pokemon-page.component';
 import { WinnersPageComponent } from 'src/pages/winners-page/winners-page.component';
 
 const routes: Routes = [
@@ -50,7 +51,11 @@ const routes: Routes = [
                 component: CurrentGamePageComponent
             }
         ]
-    }
+    },
+    {
+        path: "pokemon",
+        component: PokemonPageComponent
+    },
 ];
 
 @NgModule({

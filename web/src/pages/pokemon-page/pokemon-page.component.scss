@@ -1,0 +1,28 @@
+:host {
+    display: flex;
+    flex-direction: column;
+
+    .pokemon-header {
+        display: flex;
+        justify-content: space-evenly;
+        align-items: start;
+        margin-bottom: 10px;
+    }
+
+    .pokemon-list {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding-left: 180px;
+        padding-right: 180px;
+
+        ::ng-deep pokemon-card:not(:last-child) {
+            // margin-right: 10px;
+            margin-bottom: 10px;
+        }
+    }
+
+    label {
+        color: white;
+    }
+}

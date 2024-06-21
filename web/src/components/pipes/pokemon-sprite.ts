@@ -9,7 +9,7 @@ import { PokeApiService } from 'src/services/pokeapi.service';
 
 export class PokemonSpritePipe implements PipeTransform {
     transform(pokemonName: string): Observable<string> {
-        return this.pokeApiService.getPokemon(pokemonName.toLowerCase()).pipe(
+        return this.pokeApiService.getPokemonByName(pokemonName.toLowerCase()).pipe(
             map((pokemon: any) => pokemon.sprites.front_default)
         );
     }

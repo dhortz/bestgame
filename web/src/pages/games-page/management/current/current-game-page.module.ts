@@ -1,13 +1,13 @@
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { CurrentGamePageComponent } from './current-game-page.component';
-import { CurrentGameModule } from 'src/components/current-game/current-game.module';
 import { CommonModule } from '@angular/common';
-import { ParseRoundKeysPipe } from './parse-round-keys';
+import { NgModule } from '@angular/core';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
-import { PokemonSpritePipe } from './pokemon-sprite';
+import { MatTableModule } from '@angular/material/table';
+import { BrowserModule } from '@angular/platform-browser';
+import { CurrentGameModule } from 'src/components/current-game/current-game.module';
+import { CurrentGamePageComponent } from './current-game-page.component';
+import { ParseRoundKeysPipe } from './parse-round-keys';
+import { PipesModule } from 'src/components/pipes/pipes.module';
 
 export { CurrentGamePageComponent } from './current-game-page.component';
 
@@ -18,7 +18,8 @@ export { CurrentGamePageComponent } from './current-game-page.component';
         MatTableModule,
         MatPaginatorModule,
         MatSortModule,
-        CurrentGameModule
+        CurrentGameModule,
+        PipesModule
     ],
     exports: [
         CurrentGamePageComponent
@@ -26,7 +27,6 @@ export { CurrentGamePageComponent } from './current-game-page.component';
     declarations: [
         CurrentGamePageComponent,
         ParseRoundKeysPipe,
-        PokemonSpritePipe
     ],
     providers: [],
 })

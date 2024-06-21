@@ -42,7 +42,7 @@ export class PokemonSelectionComponent {
     }
 
     addSelectedPokemon() {
-        forkJoin(this.selectedPokemonNames.map(poke => this.pokeApiService.getPokemon(poke).pipe(map((data: any) => (<Pokemon>{
+        forkJoin(this.selectedPokemonNames.map(poke => this.pokeApiService.getPokemonByName(poke).pipe(map((data: any) => (<Pokemon>{
             name: data.name,
             sprite: data.sprites.front_default
         }))))).subscribe(pokemon => {
