@@ -48,9 +48,11 @@
     </button>
 </div>
 
-<div *ngIf="pokemon.length > 0" class="pokemon-list">
-    <ng-container *ngFor="let poke of pokemon">
-        <pokemon-card [pokemon]="poke">
-        </pokemon-card>
-    </ng-container>
-</div>
+<loading [status]="loadingStatus">
+    <div class="pokemon-list">
+        <ng-container *ngFor="let poke of pokemon">
+            <pokemon-card [pokemon]="poke">
+            </pokemon-card>
+        </ng-container>
+    </div>
+</loading>

@@ -1,11 +1,13 @@
 :host {
     display: flex;
     flex-direction: column;
+    padding-left: 150px;
+    padding-right: 150px;
 
     .pokemon-header {
         display: flex;
         justify-content: space-evenly;
-        align-items: start;
+        align-items: flex-start;
         margin-bottom: 10px;
     }
 
@@ -13,11 +15,10 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
-        padding-left: 180px;
-        padding-right: 180px;
+        padding-left: 200px;
+        padding-right: 200px;
 
         ::ng-deep pokemon-card:not(:last-child) {
-            // margin-right: 10px;
             margin-bottom: 10px;
         }
     }

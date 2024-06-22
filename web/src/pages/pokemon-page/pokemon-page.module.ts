@@ -1,12 +1,13 @@
 import { NgModule } from '@angular/core';
 
-import { PokemonPageComponent } from './pokemon-page.component';
-import { PokemonCardModule } from 'src/components/pokemon-card/pokemon-card.module';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { PokemonCardModule } from 'src/components/pokemon-card/pokemon-card.module';
+import { PokemonPageComponent } from './pokemon-page.component';
+import { LoadingModule } from 'src/components/loading/loading.module';
 
 @NgModule({
     imports: [
@@ -16,7 +17,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
         MatSelectModule, 
         MatInputModule, 
         FormsModule,
-        ReactiveFormsModule
+        ReactiveFormsModule,
+        LoadingModule
     ],
     declarations: [
         PokemonPageComponent
