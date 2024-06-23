@@ -1,12 +1,12 @@
 import { Component, HostBinding } from '@angular/core';
-import { FormControl, Validators } from '@angular/forms';
-import { ThemePalette } from '@angular/material/core';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { first, tap } from 'rxjs/operators';
+import { FormControl } from '@angular/forms';
+import { BehaviorSubject } from 'rxjs';
 import { LoadingStatus } from 'src/components/loading/loading.module';
 import { Pokemon } from 'src/models/pokemon';
-import { PokeApiService } from 'src/services/pokeapi.service';
+import { Generations, Regions, Types } from './api/categories';
 import { Category } from './api/category';
+import { PokemonRandomService } from './common/pokemon-random.service';
+import { DataSource } from '@angular/cdk/collections';
 
 @Component({
     selector: 'pokemon-page',
@@ -20,49 +20,42 @@ export class PokemonPageComponent {
     loadingStatus = LoadingStatus.LOADED;
     
     readonly numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    readonly generations = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    
+    gens = Generations;
+    regions = Regions;
+    types = Types;
 
     custom$ = new BehaviorSubject<boolean>(false);
 
-    category$ = new Subject<Category>();
+    category$ = new BehaviorSubject<Category | null>(null);
 
-    numberSelected = new FormControl<number>(1, Validators.required);
+    numberSelected = new FormControl<number>(1);
     genSelected = new FormControl<number>(1);
-    regionSelected = new FormControl<string>("");
+    regionSelected = new FormControl<number>(1);
     typeSelected = new FormControl<string>("");
 
     pokemon: Pokemon[] = [];
 
     constructor(
-        private pokeApiService: PokeApiService
-    ) { }
+        private pokeService: PokemonRandomService
+    ) {}
 
     generatePokemon() {
         this.loadingStatus = LoadingStatus.LOADING;
-        this.pokemon = [];
+        console.log("category =>", this.category$.value); 
 
-        console.log("generatePokemon#numberSelected", this.numberSelected.value);
-        console.log("generatePokemon#genSelected", this.genSelected.value);
+        // console.log("generatePokemon#numberSelected", this.numberSelected.value);
+        // console.log("generatePokemon#genSelected", this.genSelected.value);
 
-        this.loadingStatus = LoadingStatus.LOADED;
+        // this.loadingStatus = LoadingStatus.LOADED;
     }
 
     generateRandomPokemon() {
         this.loadingStatus = LoadingStatus.LOADING;
-        this.pokemon = [];
-        const generateNumber = this.numberSelected.value || 1;
-        const randomNumbers = [...Array(generateNumber)].map(e => ~~(Math.random() * 1025));
-
-        for (let index = 0; index < generateNumber; index++) {
-            this.pokeApiService.getPokemonByNumber(randomNumbers[index]).pipe(
-                first(),
-                tap(poke => {
-                    const name = poke.name.split('-')[0];
-
-                    this.pokemon.push({ name, sprite: poke.sprites.front_default });
-                })
-            ).subscribe(() => this.loadingStatus = LoadingStatus.LOADED)
-        }
+        this.pokeService.getTrueRandom(Number(this.numberSelected.value)).subscribe(pokemons => {
+            this.pokemon = pokemons;
+            this.loadingStatus = LoadingStatus.LOADED;
+        });
     }
 
     customize() {
