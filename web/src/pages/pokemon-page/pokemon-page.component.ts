@@ -31,8 +31,8 @@ export class PokemonPageComponent {
 
     numberSelected = new FormControl<number>(1);
     genSelected = new FormControl<number>(1);
-    regionSelected = new FormControl<number>(1);
-    typeSelected = new FormControl<string>("");
+    regionSelected = new FormControl<number>(2);
+    typeSelected = new FormControl<number>(1);
 
     pokemon: Pokemon[] = [];
 
@@ -42,12 +42,27 @@ export class PokemonPageComponent {
 
     generatePokemon() {
         this.loadingStatus = LoadingStatus.LOADING;
-        console.log("category =>", this.category$.value); 
+        
+        if (this.category$.value === Category.GENERATION){
+            this.pokeService.getPokemonByGeneration(Number(this.numberSelected.value), Number(this.genSelected.value)).subscribe(pokemons => {
+                this.pokemon = pokemons;
+                this.loadingStatus = LoadingStatus.LOADED;
+            })
+        }
 
-        // console.log("generatePokemon#numberSelected", this.numberSelected.value);
-        // console.log("generatePokemon#genSelected", this.genSelected.value);
+        if (this.category$.value === Category.REGION) {
+            this.pokeService.getPokemonByRegion(Number(this.numberSelected.value), Number(this.regionSelected.value)).subscribe(pokemons => {
+                this.pokemon = pokemons;
+                this.loadingStatus = LoadingStatus.LOADED;
+            })
+        }
 
-        // this.loadingStatus = LoadingStatus.LOADED;
+        if (this.category$.value === Category.TYPE) {
+            this.pokeService.getPokemonByType(Number(this.numberSelected.value), Number(this.typeSelected.value)).subscribe(pokemons => {
+                this.pokemon = pokemons;
+                this.loadingStatus = LoadingStatus.LOADED;
+            })
+        }
     }
 
     generateRandomPokemon() {

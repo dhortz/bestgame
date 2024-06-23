@@ -58,7 +58,7 @@ export class PokeApiService {
         const url = `${this.REGION_URL}${region}`;
 
         return this.http.get<any>(url).pipe(
-            map(response => response.pokemon_entries)
+            map(response => response.pokemon_entries.map((pokeEntries: any) => pokeEntries.pokemon_species))
         );
     }
 
@@ -66,7 +66,7 @@ export class PokeApiService {
         const url = `${this.TYPES_URL}${type}`;
 
         return this.http.get<any>(url).pipe(
-            map(response => response.pokemon)
+            map(response => response.pokemon.map((pokeEntries: any) => pokeEntries.pokemon))
         );
     }
 }

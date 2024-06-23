@@ -56,7 +56,7 @@ export const Regions = [
     },
     {
         label: "Unova",
-        value: 8
+        value: 9
     },
     {
         label: "Kalos",

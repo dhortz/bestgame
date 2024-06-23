@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { combineLatest, of } from 'rxjs';
-import { first, map, tap } from 'rxjs/operators';
+import { combineLatest } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { PokeApiService } from 'src/services/pokeapi.service';
 
 @Injectable()
@@ -15,28 +15,82 @@ export class PokemonRandomService {
     getTrueRandom(numberOfPoke: number) {
         const randomNumbers = this.getRandomNumbers(numberOfPoke, this.POKEDEX_TOTAL);
 
-        let pokemon = [];
-
-        for (let index = 0; index < numberOfPoke; index++) {
-            pokemon.push(this.pokeApi.getPokemonByNumber(randomNumbers[index]).pipe(
-                map(poke => {
-                    const name = poke.name.split('-')[0];
-                    return {
-                        name,
-                        sprite: poke.sprites.front_default
-                    };
-                })
-            ))
-        }
-
-        return combineLatest(pokemon);
+        return combineLatest(randomNumbers.map(number =>
+            this.pokeApi.getPokemonByNumber(number).pipe(
+                map((poke) => this.transformPokemon(poke))
+            )
+        ));
     }
 
-    getPokemonByGeneration() {
-        this.pokeApi.getPokemonsByGeneration(9).pipe(first()).subscribe();
+    getPokemonByGeneration(numberOfPoke: number, gen: number) {
+        return this.pokeApi.getPokemonsByGeneration(gen).pipe(
+            switchMap(pokemons => {
+                const randomNumbers = this.getRandomNumbers(numberOfPoke, pokemons.length - 1);
+                pokemons = pokemons.map((pokemon: any) => {
+                    const url = pokemon.url.split("/");
+                    return url[url.length - 2];
+                });
+                const pokemonToPresent = randomNumbers.map(number => pokemons[number]);
+                return combineLatest(pokemonToPresent.map(pokeToPresent =>
+                    this.pokeApi.getPokemonByNumber(pokeToPresent).pipe(
+                        map((poke) => this.transformPokemon(poke))
+                    )
+                ));
+            })
+        );
+    }
+
+    getPokemonByRegion(numberOfPoke: number, region: number) {
+        return this.pokeApi.getPokemonsByRegion(region).pipe(
+            switchMap(pokemons => {
+                const randomNumbers = this.getRandomNumbers(numberOfPoke, pokemons.length - 1);
+                pokemons = pokemons.map((pokemon: any) => {
+                    const url = pokemon.url.split("/");
+                    return url[url.length - 2];
+                });
+                const pokemonToPresent = randomNumbers.map(number => pokemons[number]);
+                return combineLatest(pokemonToPresent.map(pokeToPresent =>
+                    this.pokeApi.getPokemonByNumber(pokeToPresent).pipe(
+                        map((poke) => this.transformPokemon(poke))
+                    )
+                ));
+            })
+        );
+    }
+
+    getPokemonByType(numberOfPoke: number, type: number) {
+        return this.pokeApi.getPokemonsByType(type).pipe(
+            switchMap(pokemons => {
+                const randomNumbers = this.getRandomNumbers(numberOfPoke, pokemons.length - 1);
+                pokemons = pokemons.map((pokemon: any) => {
+                    const url = pokemon.url.split("/");
+                    return url[url.length - 2];
+                });
+                const pokemonToPresent = randomNumbers.map(number => pokemons[number]);
+                return combineLatest(pokemonToPresent.map(pokeToPresent =>
+                    this.pokeApi.getPokemonByNumber(pokeToPresent).pipe(
+                        map((poke) => this.transformPokemon(poke))
+                    )
+                ));
+            })
+        );
+    }
+
+    private transformPokemon(pokemon: any) {
+        return {
+            name: pokemon.species.name,
+            sprite: pokemon.sprites.front_default
+        };
     }
 
     private getRandomNumbers(numberOfPoke: number, total: number) {
-        return [...Array(numberOfPoke)].map(e => ~~(Math.random() * total))
+        const numbers = Array.from({ length: total }, (_, i) => i + 1);
+
+        for (let i = numbers.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+        }
+
+        return numbers.slice(0, numberOfPoke);
     }
 }
