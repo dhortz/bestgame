@@ -25,12 +25,7 @@ export class PokemonRandomService {
     getPokemonByGeneration(numberOfPoke: number, gen: number) {
         return this.pokeApi.getPokemonsByGeneration(gen).pipe(
             switchMap(pokemons => {
-                const randomNumbers = this.getRandomNumbers(numberOfPoke, pokemons.length - 1);
-                pokemons = pokemons.map((pokemon: any) => {
-                    const url = pokemon.url.split("/");
-                    return url[url.length - 2];
-                });
-                const pokemonToPresent = randomNumbers.map(number => pokemons[number]);
+                const pokemonToPresent = this.pokemonsToPresent(numberOfPoke, pokemons);
                 return combineLatest(pokemonToPresent.map(pokeToPresent =>
                     this.pokeApi.getPokemonByNumber(pokeToPresent).pipe(
                         map((poke) => this.transformPokemon(poke))
@@ -43,12 +38,7 @@ export class PokemonRandomService {
     getPokemonByRegion(numberOfPoke: number, region: number) {
         return this.pokeApi.getPokemonsByRegion(region).pipe(
             switchMap(pokemons => {
-                const randomNumbers = this.getRandomNumbers(numberOfPoke, pokemons.length - 1);
-                pokemons = pokemons.map((pokemon: any) => {
-                    const url = pokemon.url.split("/");
-                    return url[url.length - 2];
-                });
-                const pokemonToPresent = randomNumbers.map(number => pokemons[number]);
+                const pokemonToPresent = this.pokemonsToPresent(numberOfPoke, pokemons);
                 return combineLatest(pokemonToPresent.map(pokeToPresent =>
                     this.pokeApi.getPokemonByNumber(pokeToPresent).pipe(
                         map((poke) => this.transformPokemon(poke))
@@ -58,15 +48,11 @@ export class PokemonRandomService {
         );
     }
 
+    // FIXME: get pokemon number from url in species like the others
     getPokemonByType(numberOfPoke: number, type: number) {
         return this.pokeApi.getPokemonsByType(type).pipe(
             switchMap(pokemons => {
-                const randomNumbers = this.getRandomNumbers(numberOfPoke, pokemons.length - 1);
-                pokemons = pokemons.map((pokemon: any) => {
-                    const url = pokemon.url.split("/");
-                    return url[url.length - 2];
-                });
-                const pokemonToPresent = randomNumbers.map(number => pokemons[number]);
+                const pokemonToPresent = this.pokemonsToPresent(numberOfPoke, pokemons);
                 return combineLatest(pokemonToPresent.map(pokeToPresent =>
                     this.pokeApi.getPokemonByNumber(pokeToPresent).pipe(
                         map((poke) => this.transformPokemon(poke))
@@ -74,6 +60,15 @@ export class PokemonRandomService {
                 ));
             })
         );
+    }
+
+    private pokemonsToPresent(numberOfPoke: number, pokemons: any): number[] {
+        const randomNumbers = this.getRandomNumbers(numberOfPoke, pokemons.length - 1);
+        pokemons = pokemons.map((pokemon: any) => {
+            const url = pokemon.url.split("/");
+            return url[url.length - 2];
+        });
+        return randomNumbers.map(number => pokemons[number]);
     }
 
     private transformPokemon(pokemon: any) {
