@@ -12,14 +12,6 @@ const roundSchema = new Schema({
         ref: 'Game',
         required: true
     },
-    day: {
-        type: String,
-        required: true
-    },
-    week: {
-        type: Number,
-        required: true
-    },
     pokemonNames: [String],
 });
 

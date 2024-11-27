@@ -5,8 +5,7 @@
 <ng-container *ngIf="(currentGame$ | async) as currentGame">
     <div class="current-game-body">
         <div class="current-game-round">
-            <span>Round: </span>
-            <span>{{ currentGame.currentRound.day }} of week no.{{ currentGame.currentRound.week }}</span>
+            <span>Round #{{ currentGame.currentRound.roundId }}</span>
         </div>
 
         <div class="current-game-pokemon">

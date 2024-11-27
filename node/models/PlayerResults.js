@@ -12,21 +12,8 @@ const playerResultSchema = new Schema({
         ref: 'Round',
         required: true,
     },
-    pokemonResults: [
-        {
-            pokemon: {
-                type: String,
-                required: true,
-            },
-            points: {
-                type: Number,
-                required: true,
-            },
-        },
-    ],
-    roundPoints: {
-        type: Number,
-        required: true
+    nextRound: {
+        type: Boolean,
     }
 });
 

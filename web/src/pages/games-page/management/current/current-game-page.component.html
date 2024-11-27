@@ -1,6 +1,6 @@
 <bestgame-current-game></bestgame-current-game>
 
-<ng-container *ngIf="(currentGameDetails$ | async) as gameDetails">
+<!-- <ng-container *ngIf="(currentGameDetails$ | async) as gameDetails">
     <div class="actions">
         <button class="btn btn-sm pull-right" (click)="navigateToNewRound()">start new round</button>
     </div>
@@ -20,11 +20,6 @@
                 <ng-container *ngFor="let roundKey of roundKeys" [matColumnDef]="roundKey">
                     <th mat-header-cell *matHeaderCellDef>
                         <div class="header">
-                            <div class="header-left">
-                                <span>Week no.{{ (roundKey | parseRoundKeys).week }} - {{ (roundKey |
-                                    parseRoundKeys).day | titlecase }}</span>
-                                <span>{{ (roundKey | parseRoundKeys).pokemon | titlecase }}</span>
-                            </div>
                             <div class="header-right">
                                 <img [src]="(roundKey | parseRoundKeys).pokemon| pokemonSprite | async" />
                             </div>
@@ -52,7 +47,7 @@
             <tr mat-row *matRowDef="let row; columns: displayedColumns$ | async;"></tr>
         </table>
     </ng-container>
-</ng-container>
+</ng-container> -->
 
 <ng-template #no_entries>
     <div class="no-entries">

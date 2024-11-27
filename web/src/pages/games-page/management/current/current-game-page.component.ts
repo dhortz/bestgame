@@ -18,15 +18,15 @@ export class CurrentGamePageComponent {
         map(current => current.currentGame.gameNumber)
     );
 
-    currentGameDetails$ = this.currentGame$.pipe(
-        switchMap(currentGame => this.bestGameService.getCurrentGameDetails(currentGame)),
-        tap((details) => {
-            if (details.length > 0) {
-                this.roundKeys$.next(details[0].roundKeys);
-                this.displayedColumns$.next(["player", ...details[0].roundKeys, "totalPoints"])
-            }
-        })
-    );
+    // currentGameDetails$ = this.currentGame$.pipe(
+    //     switchMap(currentGame => this.bestGameService.getCurrentGameDetails(currentGame)),
+    //     tap((details) => {
+    //         if (details.length > 0) {
+    //             this.roundKeys$.next(details[0].roundKeys);
+    //             this.displayedColumns$.next(["player", ...details[0].roundKeys, "totalPoints"])
+    //         }
+    //     })
+    // );
 
     constructor(
         private bestGameService: BestGameDataService,

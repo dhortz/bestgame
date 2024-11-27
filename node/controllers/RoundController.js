@@ -5,162 +5,143 @@ const Player = require('../models/Player');
 const PlayerResults = require('../models/PlayerResults');
 const Game = require('../models/Game');
 
-// gets all round from a game
+// Get all rounds for a specific game
 router.get('/:gameNumber', async (req, res) => {
     try {
         const { gameNumber } = req.params;
 
         const game = await Game.findOne({ gameNumber });
-
-        const round = await Round.find({ gameId: game._id });
-        if (!round) {
-            return res.status(404).json({ msg: 'Round not found in game #' + gameNumber });
+        if (!game) {
+            return res.status(404).json({ msg: `Game #${gameNumber} not found` });
         }
 
-        res.status(200).json(round);
+        const rounds = await Round.find({ gameId: game._id });
+        if (!rounds.length) {
+            return res.status(404).json({ msg: `No rounds found for game #${gameNumber}` });
+        }
 
+        res.status(200).json(rounds);
     } catch (err) {
         console.error(err);
-        res.status(500).send('Server Error => ' + err);
+        res.status(500).json({ msg: 'Server Error', error: err.message });
     }
 });
 
-// create a new round entry (aka new day)
+// Create a new round
 router.post('/', async (req, res) => {
     try {
         const { gameNumber, pokemonNames } = req.body;
 
-        // Check if the game exists
+        // Find the game
         const game = await Game.findOne({ gameNumber });
         if (!game) {
             return res.status(404).json({ msg: 'Game not found' });
         }
 
-        // Find the last round of the game
+        // Determine the new round ID
         const lastRound = await Round.findOne({ gameId: game._id }).sort({ roundId: -1 });
+        const nextRoundId = lastRound ? lastRound.roundId + 1 : 1;
 
-        if (lastRound.day === "Sunday" && lastRound.week === 2) {
-            return res.status(500).json({ msg: "Can't add a new round! We're in the last day of the game!" });
-        }
-
-        // Calculate the next day and week
-        const nextDay = lastRound ? getNextDay(lastRound.day) : 'Monday';
-        const nextWeek = nextDay === "Monday" || lastRound.week === 2 ? 2 : 1;
-
-        // Create a new Round document
-        const round = new Round({
-            roundId: await Round.countDocuments() + 1,
+        const newRound = new Round({
+            roundId: nextRoundId,
             gameId: game._id,
-            day: nextDay,
-            week: nextWeek,
             pokemonNames,
         });
 
-        // Save the Round document
-        const savedRound = await round.save();
-
+        const savedRound = await newRound.save();
         res.status(201).json(savedRound);
     } catch (err) {
         console.error(err);
-        res.status(500).send('Server Error => ' + err);
+        res.status(500).json({ msg: 'Server Error', error: err.message });
     }
 });
 
-// create a new player round entry
-router.post('/:roundId/:playerName', async (req, res) => {
+// Add player result to a round
+router.post('/:gameNumber/:roundId/playerresult', async (req, res) => {
     try {
-        const { roundId, playerName } = req.params;
+        const { gameNumber, roundId } = req.params;
+        const { playerName, nextRound } = req.body;
 
-        const { pokemonResults } = req.body;
+        // 1. Find the game by game number
+        const game = await Game.findOne({ gameNumber });
+        if (!game) {
+            return res.status(404).json({ msg: `Game not found with number ${gameNumber}` });
+        }
 
-        // Find the round by round number
-        const round = await Round.findOne({ roundId });
-
+        // 2. Find the round by roundId and make sure it belongs to the game
+        const round = await Round.findOne({ roundId, gameId: game._id });
         if (!round) {
-            return res.status(404).json({ msg: 'Round not found' });
+            return res.status(404).json({ msg: `Round not found for game ${gameNumber}` });
         }
 
-        const game = await Game.findOne({ _id: round.gameId });
-
-        // Check if the player already exists
-        let player = await Player.findOne({ name: playerName });
-
-        // If the player does not exist, create a new player
+        // 3. Find the player by their name
+        const player = await Player.findOne({ name: playerName });
         if (!player) {
-            player = new Player({
-                name: playerName,
-                gamesWon: 0,
-            });
-            await player.save();
+            return res.status(404).json({ msg: `Player ${playerName} not found` });
         }
 
-        const playersInGame = game.players;
-
-        if(playersInGame.length > 0){
-            // Check if the player is already in the game
-            const playerAlreadyInGame = playersInGame.find(playerId => playerId.equals(player._id));
-            if (!playerAlreadyInGame) {
-                await addPlayerToGame(game, player);
-            }
-        } else {
-            await addPlayerToGame(game, player);
-        }
-
-        // Calculate roundPoints by summing the points in pokemonResults
-        const roundPoints = pokemonResults.reduce((sum, pokemon) => sum + pokemon.points, 0);
-
-        // Create a new PlayerResult document
-        const playerResult = new PlayerResults({
+        // 4. Create the PlayerResults document
+        const newPlayerResult = new PlayerResults({
             player: player._id,
             round: round._id,
-            pokemonResults,
-            roundPoints
+            nextRound: nextRound,  // This could be true or false depending on the input
         });
 
-        // Save the PlayerResult document
-        const savedPlayerResult = await playerResult.save();
+        // 5. Save the player result to the database
+        const savedPlayerResult = await newPlayerResult.save();
 
-        res.status(201).json(savedPlayerResult);
+        res.status(201).json({ msg: 'Player result added successfully', playerResult: savedPlayerResult });
     } catch (err) {
         console.error(err);
-        res.status(500).send('Server Error => ' + err);
+        res.status(500).json({ msg: 'Server Error', error: err.message });
     }
 });
 
-// delete all player results for a specific round
+
+// Delete all player results for a round
 router.delete('/:roundId', async (req, res) => {
     try {
         const { roundId } = req.params;
 
-        const round = await Round.find({ roundId });
+        const round = await Round.findOne({ roundId });
+        if (!round) {
+            return res.status(404).json({ msg: 'Round not found' });
+        }
 
-        // Delete all PlayerResults for the specified round
         await PlayerResults.deleteMany({ round: round._id });
-
-        res.status(200).json({ msg: 'All PlayerResults for the specified round deleted successfully' });
+        res.status(200).json({ msg: 'All player results for the round deleted' });
     } catch (err) {
         console.error(err);
-        res.status(500).send('Server Error => ' + err);
+        res.status(500).json({ msg: 'Server Error', error: err.message });
     }
 });
 
-// Helper function to get the next day (e.g., Monday -> Tuesday)
-function getNextDay(currentDay) {
-    // Add your logic to determine the next day
-    // This can be based on a predefined order or a calendar
-    // For simplicity, let's assume a predefined order: Monday -> Tuesday -> ... -> Sunday -> Monday
-    const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    const currentIndex = daysOfWeek.indexOf(currentDay);
-    const nextIndex = (currentIndex + 1) % daysOfWeek.length;
-    return daysOfWeek[nextIndex];
-}
+// Delete a round
+router.delete('/:gameNumber/round/:roundId', async (req, res) => {
+    try {
+        const { gameNumber, roundId } = req.params;
 
-async function addPlayerToGame(game, player){
-    // Add the player's ID to the game's players array
-    game.players.push(player._id);
+        // Find the game by gameNumber
+        const game = await Game.findOne({ gameNumber });
+        if (!game) {
+            return res.status(404).json({ msg: `Game #${gameNumber} not found` });
+        }
 
-    // Save the updated game
-    await game.save();
-}
+        // Find the round by roundId and gameId
+        const round = await Round.findOne({ gameId: game._id, roundId });
+        if (!round) {
+            return res.status(404).json({ msg: `Round #${roundId} not found in game #${gameNumber}` });
+        }
+
+        // Delete the round
+        await Round.findByIdAndDelete(round._id);
+
+        // Respond with a success message
+        res.status(200).json({ msg: `Round #${roundId} deleted from game #${gameNumber}` });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ msg: 'Server Error', error: err.message });
+    }
+});
 
 module.exports = router;

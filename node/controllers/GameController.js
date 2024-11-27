@@ -5,187 +5,161 @@ const Round = require('../models/Round');
 const Player = require('../models/Player');
 const PlayerResults = require('../models/PlayerResults');
 
-// return list of games
+// List all games
 router.get('/', async (req, res) => {
     try {
-        const games = await Game.find({});
+        const games = await Game.find().populate('players');
         res.status(200).json(games);
     } catch (err) {
         console.error(err);
-        res.status(500).send('Server Error');
+        res.status(500).json({ msg: 'Server Error', error: err.message });
     }
 });
 
-// starts a new game
+// Start a new game
 router.post('/newgame', async (req, res) => {
     try {
-        const gameNumber = await Game.countDocuments() + 1;
-        const newGame = {
+        const gameNumber = (await Game.countDocuments()) + 1;
+
+        // Create the new game document
+        const newGame = new Game({
             gameNumber,
             startDate: new Date(),
-            playersCount: 0,
-            winner: null
-        };
-        const savedGame = await Game.findOneAndUpdate(
-            { gameNumber },
-            newGame,
-            { upsert: true, new: true }
-        );
+            players: [],
+            winner: null,
+        });
 
-        const newRound = {
+        const savedGame = await newGame.save();
+
+        // Ensure pokemonNames is part of the request body
+        if (!req.body.pokemonNames || !Array.isArray(req.body.pokemonNames)) {
+            return res.status(400).json({ msg: 'pokemonNames is required and should be an array' });
+        }
+
+        // Create the new round with the pokemonNames
+        const newRound = new Round({
             gameId: savedGame._id,
-            roundId: await Round.countDocuments() + 1,
-            day: "Monday",
-            week: 1,
-            pokemonNames: req.body.pokemon
-        };
-        const savedRound = await Round.create(newRound);
+            roundId: 1, // assuming it's the first round
+            pokemonNames: req.body.pokemonNames,
+        });
 
+        const savedRound = await newRound.save();
+
+        // Return the game and round details
         res.status(201).json({
-            gameNumber: savedGame.gameNumber,
-            round: savedRound,
-            pokemon: savedRound.pokemonNames
+            game: savedGame,
+            firstRound: savedRound
         });
     } catch (err) {
         console.error(err);
-        res.status(500).send('Server Error');
+        res.status(500).json({ msg: 'Server Error', error: err.message });
     }
 });
 
-// deletes all games
+
+// Delete all games
 router.delete('/', async (req, res) => {
     try {
-        // Delete all results
         await PlayerResults.deleteMany({});
-
-        // Delete all rounds
         await Round.deleteMany({});
-
-        // Delete all games
         await Game.deleteMany({});
 
-        res.status(200).json({ message: 'All games and results deleted' });
+        res.status(200).json({ msg: 'All games, rounds, and player results deleted' });
     } catch (err) {
         console.error(err);
-        res.status(500).send('Server Error');
+        res.status(500).json({ msg: 'Server Error', error: err.message });
     }
 });
 
-// deletes a game
+// Delete a specific game
 router.delete('/:gameNumber', async (req, res) => {
     try {
-        const gameNumber = req.params.gameNumber;
+        const { gameNumber } = req.params;
 
-        // Delete resultss related to the game
-        await Round.deleteMany({ game: gameNumber });
-
-        // Delete game
-        const deletedGame = await Game.findOneAndDelete({ gameNumber: gameNumber });
-
-        if (!deletedGame) {
-            return res.status(404).json({ message: 'Game not found' });
+        const game = await Game.findOneAndDelete({ gameNumber });
+        if (!game) {
+            return res.status(404).json({ msg: `Game #${gameNumber} not found` });
         }
 
-        res.status(200).json({ message: `Game ${gameNumber} and related results deleted` });
+        await Round.deleteMany({ gameId: game._id });
+        await PlayerResults.deleteMany({ round: { $in: game.rounds } });
+
+        res.status(200).json({ msg: `Game #${gameNumber} and associated data deleted` });
     } catch (err) {
         console.error(err);
-        res.status(500).send('Server Error');
+        res.status(500).json({ msg: 'Server Error', error: err.message });
     }
 });
 
-// get information about a game, its rounds, and player results
+// Get game details with rounds and results
 router.get('/:gameNumber/details', async (req, res) => {
     try {
         const { gameNumber } = req.params;
 
-        const game = await Game.findOne({ gameNumber });
-
+        const game = await Game.findOne({ gameNumber }).populate('players');
         if (!game) {
-            return res.status(404).json({ msg: 'Game not found with number ' + gameNumber });
+            return res.status(404).json({ msg: `Game #${gameNumber} not found` });
         }
 
         const rounds = await Round.find({ gameId: game._id });
 
-        const totalPointsByPlayer = await calculateTotalPointsByPlayer(game.players, rounds);
+        // Fetch the player results from all rounds in the game
+        const playerResults = await PlayerResults.find({ round: { $in: rounds.map((r) => r._id) } }).populate('player round');
 
-        // Manually populate playerResults
-        const resultsByPlayerPromises = game.players.map(async (player) => {
-            const playerResults = await PlayerResults.find({ player, round: { $in: rounds } }).populate('round');
+        // Calculate results for each player
+        const resultsByPlayer = game.players.map((player) => {
+            const playerResultsForGame = playerResults.filter((res) => res.player._id.equals(player._id));
 
-            const uniqueRounds = [...new Set(playerResults.map((result) => result.round._id))];
-
-            const currentPlayer = await Player.findById(player);
+            // Calculate the total points for the player by summing roundPoints
+            const totalPoints = playerResultsForGame.reduce((sum, res) => sum + (res.roundPoints || 0), 0);
 
             return {
-                game: game.gameNumber,
-                player: currentPlayer.name,
-                totalPoints: totalPointsByPlayer[player._id],
-                rounds: uniqueRounds.map((roundId) => {
-                    const result = playerResults.find((res) => res.round._id.toString() === roundId.toString());
-                    return {
-                        round: result.round,
-                        pokemonResults: result.pokemonResults,
-                        roundPoints: result.roundPoints,
-                    };
-                }),
+                player: player.name,
+                totalPoints,
+                rounds: playerResultsForGame.map((res) => ({
+                    roundId: res.round.roundId,
+                    pokemonResults: res.pokemonResults,
+                    roundPoints: res.roundPoints, // Include the points for the round
+                })),
             };
         });
 
-        const resultsByPlayer = await Promise.all(resultsByPlayerPromises);
-        const flattenedResults = resultsByPlayer.flat();
-
-        res.status(200).json(flattenedResults);
-
+        res.status(200).json({ game, rounds, playerResults: resultsByPlayer });
     } catch (err) {
         console.error(err);
-        res.status(500).send('Server Error => ' + err);
+        res.status(500).json({ msg: 'Server Error', error: err.message });
     }
 });
 
-// add player to game
+
+// Add a player to a game
 router.patch('/:gameNumber/player', async (req, res) => {
     try {
         const { gameNumber } = req.params;
         const { playerName } = req.body;
 
-        const game = await Game.findOne({ gameNumber })
-
+        const game = await Game.findOne({ gameNumber });
         if (!game) {
-            return res.status(404).json({ msg: 'Game not found with number ' + gameNumber });
+            return res.status(404).json({ msg: `Game #${gameNumber} not found` });
         }
 
-        // Check if the player already exists
         let player = await Player.findOne({ name: playerName });
-
-        // If the player does not exist, create a new player
         if (!player) {
-            player = new Player({
-                name: playerName,
-                gamesWon: 0,
-            });
+            player = new Player({ name: playerName, gamesWon: 0 });
             await player.save();
         }
 
-        const playersInGame = game.players;
-
-        // Check if the player is already in the game
-        const playerAlreadyInGame = playersInGame.find(playerId => playerId.equals(player._id));
-
-        if (!playerAlreadyInGame) {
-            // Add the player's ID to the game's players array
-            game.players.push(player._id);
-
-            // Save the updated game
-            await game.save();
-
-            res.status(201).json({ msg: 'Player added to the game', player, game });
-        } else {
-            res.status(500).json({ msg: 'Player already in game' });
+        if (game.players.includes(player._id)) {
+            return res.status(400).json({ msg: 'Player is already in the game' });
         }
 
+        game.players.push(player._id);
+        await game.save();
+
+        res.status(201).json({ msg: 'Player added to the game', game });
     } catch (err) {
         console.error(err);
-        res.status(500).send('Server Error => ' + err);
+        res.status(500).json({ msg: 'Server Error', error: err.message });
     }
 });
 
@@ -194,72 +168,70 @@ router.patch('/:gameNumber/endgame', async (req, res) => {
     try {
         const { gameNumber } = req.params;
 
+        // Find the game by gameNumber
         const game = await Game.findOne({ gameNumber });
 
         if (!game) {
             return res.status(404).json({ msg: 'Game not found with number ' + gameNumber });
         }
 
-        // Find all rounds associated with the game
+        // Retrieve all rounds for the game
         const rounds = await Round.find({ gameId: game._id });
 
-        // Get all players in the game
-        const players = game.players;
+        if (!rounds || rounds.length === 0) {
+            return res.status(404).json({ msg: 'No rounds found for this game' });
+        }
 
-        // Calculate total points for all players in all rounds
-        const totalPointsByPlayer = await calculateTotalPointsByPlayer(players, rounds);
+        // Retrieve all PlayerResults for the rounds in this game
+        const playerResultsForGame = await PlayerResults.find({ round: { $in: rounds.map(r => r._id) } }).populate('player');
 
-        // Find the player with the maximum points
-        const maxPointsPlayer = getMaxPointsPlayer(totalPointsByPlayer);
+        if (!playerResultsForGame || playerResultsForGame.length === 0) {
+            return res.status(404).json({ msg: 'No player results found for this game' });
+        }
 
-        game.winner = maxPointsPlayer.playerId;
+        // Count how many rounds each player participated in
+        const participationCounts = {};
+        playerResultsForGame.forEach(result => {
+            const playerId = result.player._id.toString();
+            if (!participationCounts[playerId]) {
+                participationCounts[playerId] = 0;
+            }
+            participationCounts[playerId]++;
+        });
+
+        // Find the player with the highest participation
+        const maxParticipationPlayerId = Object.keys(participationCounts).reduce((maxId, playerId) =>
+            participationCounts[playerId] > (participationCounts[maxId] || 0) ? playerId : maxId
+        );
+
+        // Update the game with the winner
+        game.winner = maxParticipationPlayerId;
         await game.save();
 
-        const winner = await Player.findById(maxPointsPlayer.playerId);
-
+        // Update the winner's gamesWon count
+        const winner = await Player.findById(maxParticipationPlayerId);
         if (winner) {
             winner.gamesWon += 1;
             await winner.save();
         }
 
-        res.status(200).json({ gameNumber, totalPointsByPlayer, maxPointsPlayer });
+        res.status(200).json({
+            gameNumber: game.gameNumber,
+            winner: winner.name,
+            participationCounts,
+        });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error => ' + err);
     }
 });
 
-// Get total points in a game by player
-router.get('/:gameNumber/points/:playerName', async (req, res) => {
-    try {
-        const { gameNumber, playerName } = req.params;
-
-        const game = await Game.findOne({ gameNumber });
-
-        if (!game) {
-            return res.status(404).json({ msg: 'Game not found with number ' + gameNumber });
-        }
-
-        // Find all rounds associated with the game
-        const rounds = await Round.find({ gameId: game._id });
-
-        const player = await Player.find({ name: playerName })
-
-        // Calculate total points for all players in all rounds
-        const totalPointsByPlayer = await calculateTotalPointsByPlayer([player], rounds);
-
-        res.status(200).json({ gameNumber, totalPointsByPlayer });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Server Error => ' + err);
-    }
-});
 
 // Get current game and round
 router.get('/currentgame', async (req, res) => {
     try {
         // Find the latest game
-        const currentGame = await Game.findOne().sort({ beginDate: -1 }).populate('players');;
+        const currentGame = await Game.findOne().sort({ startDate: -1 }).populate('players');
 
         if (!currentGame) {
             return res.status(404).json({ msg: 'No games found' });
@@ -267,58 +239,20 @@ router.get('/currentgame', async (req, res) => {
 
         // Find the latest round of the latest game
         const currentRound = await Round.findOne({ gameId: currentGame._id })
-            .sort({ roundId: -1 })
-            .limit(1);
+            .sort({ roundId: -1 }) // Get the most recent round
+            .limit(1); // Ensure we only get one round
 
         if (!currentRound) {
             return res.status(404).json({ msg: 'No rounds found for the latest game' });
         }
 
-        res.status(200).json({ currentGame, currentRound });
+        // Include pokemonNames in the response
+        res.status(200).json({ currentGame, currentRound: { ...currentRound.toObject(), pokemonNames: currentRound.pokemonNames } });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error => ' + err);
     }
 });
 
-async function calculateTotalPointsByPlayer(players, rounds) {
-    const totalPointsByPlayer = {};
-
-    // Initialize total points for each player
-    players.forEach((player) => {
-        totalPointsByPlayer[player.toString()] = 0;
-    });
-
-    // Update total points for each player in all rounds
-    await Promise.all(
-        rounds.map(async (round) => {
-            const roundPlayerResults = await PlayerResults.find({ round: round._id });
-
-            console.log("roundPlayerResults =>", roundPlayerResults);
-
-            roundPlayerResults.forEach((playerResult) => {
-                totalPointsByPlayer[playerResult.player.toString()] += playerResult.roundPoints;
-            });
-        })
-    );
-
-    return totalPointsByPlayer;
-}
-
-function getMaxPointsPlayer(totalPointsByPlayer) {
-    let maxPoints = -1;
-    let maxPointsPlayer = null;
-
-    // Iterate over players to find the one with the maximum points
-    Object.entries(totalPointsByPlayer).forEach(([playerId, points]) => {
-
-        if (points > maxPoints) {
-            maxPoints = points;
-            maxPointsPlayer = playerId;
-        }
-    });
-
-    return { playerId: maxPointsPlayer, points: maxPoints };
-}
 
 module.exports = router;

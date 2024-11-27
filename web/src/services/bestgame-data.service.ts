@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CurrentGame } from 'src/models/current-game';
 import { Game } from 'src/models/game';
@@ -52,25 +53,25 @@ export class BestGameDataService {
     getCurrentGameDetails(gameNumber: number) {
         const url = this.BASE_URL + this.GAMES + `/${gameNumber}/details`;
 
-        return this.http.get<Results[]>(url).pipe(
-            map(results => {
-                const adaptResults = results.map(result => {
-                    let adaptRounds: any = {};
-                    const roundKeys: string[] = [];
-                    result.rounds.forEach(round => {
-                        round.pokemonResults.forEach(pokemonResult => {
-                            const roundKey = `${round.round.roundId}_${round.round.day.toLowerCase()}_${round.round.week}_${pokemonResult.pokemon}`;
-                            roundKeys.push(roundKey);
-                            adaptRounds[roundKey] = pokemonResult.points;
-                        });
-                    });
+        return of(null);
+        // return this.http.get<Results[]>(url).pipe(
+        //     map(results => {
+        //         const adaptResults = results.map(result => {
+        //             let adaptRounds: any = {};
+        //             const roundKeys: string[] = [];
+        //             result.rounds.forEach(round => {
+        //                 round.pokemonNames.forEach(pokemonName => {
+        //                     const roundKey = `${round.roundId}_${pokemonName}`;
+        //                     roundKeys.push(roundKey);
+        //                 });
+        //             });
 
-                    return { ...result, ...adaptRounds, roundKeys };
-                });
+        //             return { ...result, ...adaptRounds, roundKeys };
+        //         });
 
-                return adaptResults;
-            })
-        );
+        //         return adaptResults;
+        //     })
+        // );
     }
 
     addNewRound(gameNumber: number, pokemonNames: string[]){
