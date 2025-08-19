@@ -12,7 +12,7 @@ import { WinnersPageComponent } from 'src/pages/winners-page/winners-page.compon
 const routes: Routes = [
     {
         path: '',
-        redirectTo: 'home',
+        redirectTo: 'pokemon',
         pathMatch: 'full'
     },
     {
