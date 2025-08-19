@@ -6,6 +6,6 @@ import { Component } from '@angular/core';
     styleUrls: ['./menu.component.scss']
 })
 export class MenuComponent {
-    readonly imgSrc = "../assets/images/best_game_logo.png";
+    readonly imgSrc = "assets/images/best_game_logo.png";
     title = 'Best Game!';
 }
