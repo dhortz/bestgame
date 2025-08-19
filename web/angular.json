@@ -53,7 +53,7 @@
                 }
               ],
               "outputHashing": "all",
-              "baseHref": "bestgame"
+              "baseHref": "/bestgame/"
             },
             "development": {
               "buildOptimizer": false,
