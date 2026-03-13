@@ -2,11 +2,14 @@ import { Injectable } from '@angular/core';
 import { combineLatest } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { PokeApiService } from 'src/services/pokeapi.service';
+import { pkmnAlias } from '../api/pkmn-alias';
 
 @Injectable()
 export class PokemonRandomService {
 
     private readonly POKEDEX_TOTAL = 1025;
+
+    readonly pkmnAlias = pkmnAlias;
 
     constructor(
         private pokeApi: PokeApiService
@@ -73,7 +76,7 @@ export class PokemonRandomService {
 
     private transformPokemon(pokemon: any) {
         return {
-            name: pokemon.species.name,
+            name: this.pkmnAlias[pokemon.species.name] || pokemon.species.name,
             sprite: pokemon.sprites.front_default
         };
     }
