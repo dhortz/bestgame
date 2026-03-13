@@ -6,7 +6,6 @@ import { Pokemon } from 'src/models/pokemon';
 import { Generations, Regions, Types } from './api/categories';
 import { Category } from './api/category';
 import { PokemonRandomService } from './common/pokemon-random.service';
-import { DataSource } from '@angular/cdk/collections';
 
 @Component({
     selector: 'pokemon-page',
@@ -17,7 +16,8 @@ import { DataSource } from '@angular/cdk/collections';
 export class PokemonPageComponent {
 
     @HostBinding('class.bg-container') bgContainer = true;
-    loadingStatus = LoadingStatus.LOADED;
+    
+    loadingStatus$ = new BehaviorSubject<LoadingStatus>(LoadingStatus.LOADED);
     
     readonly numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     
@@ -41,35 +41,35 @@ export class PokemonPageComponent {
     ) {}
 
     generatePokemon() {
-        this.loadingStatus = LoadingStatus.LOADING;
+        this.loadingStatus$.next(LoadingStatus.LOADING);
         
         if (this.category$.value === Category.GENERATION){
             this.pokeService.getPokemonByGeneration(Number(this.numberSelected.value), Number(this.genSelected.value)).subscribe(pokemons => {
                 this.pokemon = pokemons;
-                this.loadingStatus = LoadingStatus.LOADED;
+                this.loadingStatus$.next(LoadingStatus.LOADED);
             })
         }
 
         if (this.category$.value === Category.REGION) {
             this.pokeService.getPokemonByRegion(Number(this.numberSelected.value), Number(this.regionSelected.value)).subscribe(pokemons => {
                 this.pokemon = pokemons;
-                this.loadingStatus = LoadingStatus.LOADED;
+                this.loadingStatus$.next(LoadingStatus.LOADED);
             })
         }
 
         if (this.category$.value === Category.TYPE) {
             this.pokeService.getPokemonByType(Number(this.numberSelected.value), Number(this.typeSelected.value)).subscribe(pokemons => {
                 this.pokemon = pokemons;
-                this.loadingStatus = LoadingStatus.LOADED;
+                this.loadingStatus$.next(LoadingStatus.LOADED);
             })
         }
     }
 
     generateRandomPokemon() {
-        this.loadingStatus = LoadingStatus.LOADING;
+        this.loadingStatus$.next(LoadingStatus.LOADING);
         this.pokeService.getTrueRandom(Number(this.numberSelected.value)).subscribe(pokemons => {
             this.pokemon = pokemons;
-            this.loadingStatus = LoadingStatus.LOADED;
+            this.loadingStatus$.next(LoadingStatus.LOADED);
         });
     }
 

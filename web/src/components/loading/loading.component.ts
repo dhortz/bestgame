@@ -9,7 +9,7 @@ import { LoadingStatus } from './api/loading-status';
 
 export class LoadingComponent {
     
-    @Input() status = LoadingStatus.LOADING;
+    @Input() status: LoadingStatus | null = LoadingStatus.LOADING;
 
-    loadingStatus = LoadingStatus;    
+    loadingStatus = LoadingStatus.LOADING;    
 }
