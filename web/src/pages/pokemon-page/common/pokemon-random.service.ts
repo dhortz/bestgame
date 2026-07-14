@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { combineLatest } from 'rxjs';
+import { combineLatest, of } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { PokeApiService } from 'src/services/pokeapi.service';
 import { pkmnAlias } from '../api/pkmn-alias';
@@ -34,11 +34,21 @@ export class PokemonRandomService {
 
         return this.pokeApi.getGenerationRegionAndTypeData(generationId, regionId, typeId).pipe(
             switchMap(({ generation, region, type }) => {
-                const combined = [
-                    ...(generation?.pokemonSpecies || []),
-                    ...(region?.pokemonSpecies || []),
-                    ...(type?.pokemonSpecies || [])
-                ];
+                const categoryCollections = [
+                    generation?.pokemonSpecies || [],
+                    region?.pokemonSpecies || [],
+                    type?.pokemonSpecies || []
+                ].filter(collection => collection.length > 0);
+
+                if (categoryCollections.length === 0) {
+                    return this.getTrueRandom(numberOfPoke);
+                }
+
+                const combined = this.getCommonPokemon(categoryCollections);
+                
+                if(combined.length === 0) {
+                    return of([]);
+                }
 
                 if (!combined.length) {
                     return this.getTrueRandom(numberOfPoke);
@@ -53,6 +63,63 @@ export class PokemonRandomService {
                 ));
             })
         );
+    }
+
+    private getCommonPokemon(collections: any[][]): any[] {
+        if (!collections.length) {
+            return [];
+        }
+
+        if (collections.length === 1) {
+            return collections[0];
+        }
+
+        const firstCollection = collections[0];
+        const commonKeys = new Set<string>(firstCollection.map((pokemon: any) => this.getPokemonKey(pokemon)));
+
+        collections.slice(1).forEach(collection => {
+            const nextKeys = new Set<string>(collection.map((pokemon: any) => this.getPokemonKey(pokemon)));
+
+            for (const key of Array.from(commonKeys)) {
+                if (!nextKeys.has(key)) {
+                    commonKeys.delete(key);
+                }
+            }
+        });
+
+        return firstCollection.filter((pokemon: any) => commonKeys.has(this.getPokemonKey(pokemon)));
+    }
+
+    private getPokemonKey(pokemon: any): string {
+        const id = this.getPokemonId(pokemon);
+
+        if (id != null) {
+            return `id:${id}`;
+        }
+
+        if (pokemon?.url) {
+            return pokemon.url;
+        }
+
+        if (pokemon?.name) {
+            return pokemon.name;
+        }
+
+        return JSON.stringify(pokemon);
+    }
+
+    private getPokemonId(pokemon: any): number | null {
+        if (pokemon?.id != null) {
+            return Number(pokemon.id);
+        }
+
+        const url = pokemon?.url;
+        if (!url) {
+            return null;
+        }
+
+        const match = url.match(/\/(\d+)\/?$/);
+        return match ? Number(match[1]) : null;
     }
 
     private pokemonsToPresent(numberOfPoke: number, pokemons: any): number[] {
