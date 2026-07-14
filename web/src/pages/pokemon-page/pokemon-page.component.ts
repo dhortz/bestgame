@@ -4,82 +4,44 @@ import { BehaviorSubject } from 'rxjs';
 import { LoadingStatus } from 'src/components/loading/loading.module';
 import { Pokemon } from 'src/models/pokemon';
 import { Generations, Regions, Types } from './api/categories';
-import { Category } from './api/category';
 import { PokemonRandomService } from './common/pokemon-random.service';
 
 @Component({
-    selector: 'pokemon-page',
-    templateUrl: 'pokemon-page.component.html',
-    styleUrls: ['./pokemon-page.component.scss']
+  selector: 'pokemon-page',
+  templateUrl: 'pokemon-page.component.html',
+  styleUrls: ['./pokemon-page.component.scss'],
 })
-
 export class PokemonPageComponent {
+  @HostBinding('class.bg-container') bgContainer = true;
 
-    @HostBinding('class.bg-container') bgContainer = true;
-    
-    loadingStatus$ = new BehaviorSubject<LoadingStatus>(LoadingStatus.LOADED);
-    
-    readonly numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    
-    gens = Generations;
-    regions = Regions;
-    types = Types;
+  loadingStatus$ = new BehaviorSubject<LoadingStatus>(LoadingStatus.LOADED);
 
-    custom$ = new BehaviorSubject<boolean>(false);
+  readonly numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-    category$ = new BehaviorSubject<Category | null>(null);
+  gens = Generations;
+  regions = Regions;
+  types = Types;
 
-    numberSelected = new FormControl<number>(1);
-    genSelected = new FormControl<number>(1);
-    regionSelected = new FormControl<number>(2);
-    typeSelected = new FormControl<number>(1);
+  numberSelected = new FormControl<number>(1);
+  genSelected = new FormControl<number>(0);
+  regionSelected = new FormControl<number>(0);
+  typeSelected = new FormControl<number>(0);
 
-    pokemon: Pokemon[] = [];
+  pokemon: Pokemon[] = [];
 
-    constructor(
-        private pokeService: PokemonRandomService
-    ) {}
+  constructor(private pokeService: PokemonRandomService) {}
 
-    generatePokemon() {
-        this.loadingStatus$.next(LoadingStatus.LOADING);
-        
-        if (this.category$.value === Category.GENERATION){
-            this.pokeService.getPokemonByGeneration(Number(this.numberSelected.value), Number(this.genSelected.value)).subscribe(pokemons => {
-                this.pokemon = pokemons;
-                this.loadingStatus$.next(LoadingStatus.LOADED);
-            })
-        }
+  generatePokemon() {
+    this.loadingStatus$.next(LoadingStatus.LOADING);
 
-        if (this.category$.value === Category.REGION) {
-            this.pokeService.getPokemonByRegion(Number(this.numberSelected.value), Number(this.regionSelected.value)).subscribe(pokemons => {
-                this.pokemon = pokemons;
-                this.loadingStatus$.next(LoadingStatus.LOADED);
-            })
-        }
-
-        if (this.category$.value === Category.TYPE) {
-            this.pokeService.getPokemonByType(Number(this.numberSelected.value), Number(this.typeSelected.value)).subscribe(pokemons => {
-                this.pokemon = pokemons;
-                this.loadingStatus$.next(LoadingStatus.LOADED);
-            })
-        }
-    }
-
-    generateRandomPokemon() {
-        this.loadingStatus$.next(LoadingStatus.LOADING);
-        this.pokeService.getTrueRandom(Number(this.numberSelected.value)).subscribe(pokemons => {
-            this.pokemon = pokemons;
-            this.loadingStatus$.next(LoadingStatus.LOADED);
-        });
-    }
-
-    customize() {
-        this.custom$.next(!this.custom$.value);
-    }
-
-    chooseCategory() {
-        const index = Math.floor(Math.random() * Object.keys(Category).length);
-        const value = Object.values(Category)[index];
-        this.category$.next(value);
-    }
+    this.pokeService.getRandom(
+        Number(this.numberSelected.value),
+        Number(this.genSelected.value),
+        Number(this.regionSelected.value),
+        Number(this.typeSelected.value),
+      ).subscribe((pokemons) => {
+        this.pokemon = pokemons;
+        this.loadingStatus$.next(LoadingStatus.LOADED);
+      });
+  }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { combineLatest } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { PokeApiService } from 'src/services/pokeapi.service';
 import { pkmnAlias } from '../api/pkmn-alias';
 
@@ -25,37 +25,27 @@ export class PokemonRandomService {
         ));
     }
 
-    getPokemonByGeneration(numberOfPoke: number, gen: number) {
-        return this.pokeApi.getPokemonsByGeneration(gen).pipe(
-            switchMap(pokemons => {
-                const pokemonToPresent = this.pokemonsToPresent(numberOfPoke, pokemons);
-                return combineLatest(pokemonToPresent.map(pokeToPresent =>
-                    this.pokeApi.getPokemonByNumber(pokeToPresent).pipe(
-                        map((poke) => this.transformPokemon(poke))
-                    )
-                ));
-            })
-        );
-    }
+    getRandom(numberOfPoke: number, generationId: number, regionId: number, typeId: number) {
+        const hasCategorySelection = [generationId, regionId, typeId].some(id => Number(id) > 0);
 
-    getPokemonByRegion(numberOfPoke: number, region: number) {
-        return this.pokeApi.getPokemonsByRegion(region).pipe(
-            switchMap(pokemons => {
-                const pokemonToPresent = this.pokemonsToPresent(numberOfPoke, pokemons);
-                return combineLatest(pokemonToPresent.map(pokeToPresent =>
-                    this.pokeApi.getPokemonByNumber(pokeToPresent).pipe(
-                        map((poke) => this.transformPokemon(poke))
-                    )
-                ));
-            })
-        );
-    }
+        if (!hasCategorySelection) {
+            return this.getTrueRandom(numberOfPoke);
+        }
 
-    // FIXME: get pokemon number from url in species like the others
-    getPokemonByType(numberOfPoke: number, type: number) {
-        return this.pokeApi.getPokemonsByType(type).pipe(
-            switchMap(pokemons => {
-                const pokemonToPresent = this.pokemonsToPresent(numberOfPoke, pokemons);
+        return this.pokeApi.getGenerationRegionAndTypeData(generationId, regionId, typeId).pipe(
+            switchMap(({ generation, region, type }) => {
+                const combined = [
+                    ...(generation?.pokemonSpecies || []),
+                    ...(region?.pokemonSpecies || []),
+                    ...(type?.pokemonSpecies || [])
+                ];
+
+                if (!combined.length) {
+                    return this.getTrueRandom(numberOfPoke);
+                }
+
+                const pokemonToPresent = this.pokemonsToPresent(numberOfPoke, combined);
+
                 return combineLatest(pokemonToPresent.map(pokeToPresent =>
                     this.pokeApi.getPokemonByNumber(pokeToPresent).pipe(
                         map((poke) => this.transformPokemon(poke))
@@ -66,6 +56,10 @@ export class PokemonRandomService {
     }
 
     private pokemonsToPresent(numberOfPoke: number, pokemons: any): number[] {
+        if (!pokemons?.length) {
+            return [];
+        }
+
         const randomNumbers = this.getRandomNumbers(numberOfPoke, pokemons.length - 1);
         pokemons = pokemons.map((pokemon: any) => {
             const url = pokemon.url.split("/");

@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map, tap } from 'rxjs/operators';
+import { forkJoin, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 @Injectable({providedIn: 'root'})
 export class PokeApiService {
@@ -67,6 +68,32 @@ export class PokeApiService {
 
         return this.http.get<any>(url).pipe(
             map(response => response.pokemon.map((pokeEntries: any) => pokeEntries.pokemon))
+        );
+    }
+
+    getGenerationRegionAndTypeData(generationId: number, regionId: number, typeId: number) {
+        const requests = [
+            generationId > 0 ? this.http.get<any>(`${this.GENERATION_URL}${generationId}`) : of(null),
+            regionId > 0 ? this.http.get<any>(`${this.REGION_URL}${regionId}`) : of(null),
+            typeId > 0 ? this.http.get<any>(`${this.TYPES_URL}${typeId}`) : of(null)
+        ];
+
+        return forkJoin(requests).pipe(
+            map(([generation, region, type]) => ({
+                generation: generation ? {
+                    name: generation.name,
+                    pokemonSpecies: generation.pokemon_species || []
+                } : null,
+                region: region ? {
+                    name: region.name,
+                    pokemonSpecies: (region.pokemon_entries || []).map((entry: any) => entry.pokemon_species)
+                } : null,
+                type: type ? {
+                    name: type.name,
+                    pokemonSpecies: (type.pokemon || []).map((entry: any) => entry.pokemon)
+                } : null
+            })),
+            catchError(() => of({ generation: null, region: null, type: null }))
         );
     }
 }
