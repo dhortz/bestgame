@@ -19,7 +19,7 @@ export class PokemonRandomService {
         const randomNumbers = this.getRandomNumbers(numberOfPoke, this.POKEDEX_TOTAL);
 
         return combineLatest(randomNumbers.map(number =>
-            this.pokeApi.getPokemonByNumber(number).pipe(
+            this.pokeApi.getPokemonByNumber(number + 1).pipe(
                 map((poke) => this.transformPokemon(poke))
             )
         ));
@@ -127,7 +127,7 @@ export class PokemonRandomService {
             return [];
         }
 
-        const randomNumbers = this.getRandomNumbers(numberOfPoke, pokemons.length - 1);
+        const randomNumbers = this.getRandomNumbers(numberOfPoke, pokemons.length);
         pokemons = pokemons.map((pokemon: any) => {
             const url = pokemon.url.split("/");
             return url[url.length - 2];
@@ -143,7 +143,7 @@ export class PokemonRandomService {
     }
 
     private getRandomNumbers(numberOfPoke: number, total: number) {
-        const numbers = Array.from({ length: total }, (_, i) => i + 1);
+        const numbers = Array.from({ length: total }, (_, i) => i);
 
         for (let i = numbers.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
